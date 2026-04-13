@@ -6,6 +6,7 @@ import type { Dispatch } from 'react';
 export interface CartRowExtraProps {
   items: CartItem[];
   dispatch: Dispatch<CartAction>;
+  onItemRemoved?: (productTitle: string) => void;
 }
 
 // Full props received by the row component (extra + injected by react-window)
@@ -19,7 +20,7 @@ interface CartRowProps extends CartRowExtraProps {
   style: CSSProperties;
 }
 
-function CartRowInner({ items, index, style, ariaAttributes, dispatch }: CartRowProps): ReactElement | null {
+function CartRowInner({ items, index, style, ariaAttributes, dispatch, onItemRemoved }: CartRowProps): ReactElement | null {
   const item = items[index];
   if (!item) return null;
 
@@ -29,6 +30,7 @@ function CartRowInner({ items, index, style, ariaAttributes, dispatch }: CartRow
   function decrement() {
     if (quantity <= 1) {
       dispatch({ type: 'REMOVE_ITEM', payload: { productId: product.id } });
+      onItemRemoved?.(product.title);
     } else {
       dispatch({ type: 'UPDATE_QUANTITY', payload: { productId: product.id, quantity: quantity - 1 } });
     }
@@ -40,6 +42,7 @@ function CartRowInner({ items, index, style, ariaAttributes, dispatch }: CartRow
 
   function remove() {
     dispatch({ type: 'REMOVE_ITEM', payload: { productId: product.id } });
+    onItemRemoved?.(product.title);
   }
 
   return (

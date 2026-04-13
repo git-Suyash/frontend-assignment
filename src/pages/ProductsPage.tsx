@@ -6,6 +6,7 @@ import { useProducts } from '../hooks/useProducts';
 import { useDebounce } from '../hooks/useDebounce';
 import { useProductFilter, type SortOption } from '../hooks/useProductFilter';
 import type { Product } from '../types';
+import NotificationCenter from '../components/NotificationCenter';
 
 function SkeletonCard() {
   return (
@@ -63,6 +64,7 @@ export default function ProductsPage() {
   const { state: cartState, dispatch: cartDispatch } = useCart();
   const { notify } = useNotification();
   const { products, loading, error, categories } = useProducts();
+  const [notifCenterOpen, setNotifCenterOpen] = useState(false);
 
   const [rawSearch, setRawSearch] = useState('');
   const [category, setCategory] = useState('all');
@@ -75,7 +77,7 @@ export default function ProductsPage() {
 
   function handleAddToCart(product: Product) {
     cartDispatch({ type: 'ADD_ITEM', payload: product });
-    notify('success', 'Cart updated', `${product.title} added`);
+    notify('success', 'Cart updated', `${product.title} added to your cart`);
   }
 
   return (
@@ -84,17 +86,32 @@ export default function ProductsPage() {
       <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
           <h1 className="text-xl font-bold text-gray-900">OpenCart</h1>
-          <Link to="/cart" className="relative p-2 text-gray-600 hover:text-indigo-600 transition-colors">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-            </svg>
-            {cartItemCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-indigo-600 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
-                {cartItemCount > 99 ? '99+' : cartItemCount}
-              </span>
-            )}
-          </Link>
+          <div className="flex items-center gap-2">
+            {/* Notification bell */}
+            <button
+              onClick={() => setNotifCenterOpen(true)}
+              aria-label="Open notification center"
+              className="p-2 text-gray-500 hover:text-indigo-600 transition-colors"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                  d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+              </svg>
+            </button>
+
+            {/* Cart icon */}
+            <Link to="/cart" className="relative p-2 text-gray-600 hover:text-indigo-600 transition-colors">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                  d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+              {cartItemCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-indigo-600 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
+                  {cartItemCount > 99 ? '99+' : cartItemCount}
+                </span>
+              )}
+            </Link>
+          </div>
         </div>
       </header>
 
@@ -176,6 +193,8 @@ export default function ProductsPage() {
           </div>
         )}
       </main>
+
+      <NotificationCenter open={notifCenterOpen} onClose={() => setNotifCenterOpen(false)} />
     </div>
   );
 }

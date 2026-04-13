@@ -9,6 +9,7 @@ import {
 import type { CartState, CartAction } from '../types';
 import { cartReducer, initialCartState } from '../reducers/cartReducer';
 import { persistCart, loadCart, CART_STORAGE_KEY } from '../utils/storage';
+import { useNotification } from './NotificationContext';
 
 interface CartContextValue {
   state: CartState;
@@ -19,6 +20,7 @@ export const CartContext = createContext<CartContextValue | null>(null);
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(cartReducer, initialCartState);
+  const { notify } = useNotification();
 
   // Hydrate from localStorage on mount
   useEffect(() => {
@@ -55,6 +57,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
               type: 'SET_STATUS',
               payload: { status: 'conflict' },
             });
+            notify(
+              'warning',
+              'Cart conflict',
+              'Your cart was modified in another tab. Review before checkout.'
+            );
           }
         } catch {
           // ignore malformed storage values
@@ -64,7 +71,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
     window.addEventListener('storage', handleStorage);
     return () => window.removeEventListener('storage', handleStorage);
-  }, [state.version]);
+  }, [state.version, notify]);
 
   return (
     <CartContext.Provider value={{ state, dispatch }}>

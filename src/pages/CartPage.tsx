@@ -1,12 +1,16 @@
-import { useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { List } from 'react-window';
 import { useCart } from '../contexts/CartContext';
+import { useNotification } from '../contexts/NotificationContext';
 import { CartRow, type CartRowExtraProps } from '../components/CartRow';
+import NotificationCenter from '../components/NotificationCenter';
 
 export default function CartPage() {
   const { state, dispatch } = useCart();
+  const { notify } = useNotification();
   const navigate = useNavigate();
+  const [notifCenterOpen, setNotifCenterOpen] = useState(false);
 
   const items = state.items;
   const totalItems = items.reduce((sum, i) => sum + i.quantity, 0);
@@ -19,6 +23,13 @@ export default function CartPage() {
     dispatch({ type: 'SET_STATUS', payload: { status: 'idle' } });
   }, [dispatch]);
 
+  const handleItemRemoved = useCallback(
+    (productTitle: string) => {
+      notify('info', 'Item removed', `${productTitle} removed from cart`);
+    },
+    [notify]
+  );
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -30,9 +41,19 @@ export default function CartPage() {
             </svg>
             Back to shop
           </Link>
-          <h1 className="text-xl font-bold text-gray-900">
+          <h1 className="text-xl font-bold text-gray-900 flex-1">
             Your Cart ({totalItems} {totalItems === 1 ? 'item' : 'items'})
           </h1>
+          <button
+            onClick={() => setNotifCenterOpen(true)}
+            aria-label="Open notification center"
+            className="relative p-2 text-gray-500 hover:text-indigo-600 transition-colors"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+            </svg>
+          </button>
         </div>
       </header>
 
@@ -71,7 +92,7 @@ export default function CartPage() {
             <div className="flex-1 bg-white rounded-lg border border-gray-200 overflow-hidden">
               <List<CartRowExtraProps>
                 rowComponent={CartRow}
-                rowProps={{ items, dispatch }}
+                rowProps={{ items, dispatch, onItemRemoved: handleItemRemoved }}
                 rowCount={items.length}
                 rowHeight={itemSize}
                 style={{ height: listHeight }}
@@ -102,6 +123,8 @@ export default function CartPage() {
           </div>
         )}
       </main>
+
+      <NotificationCenter open={notifCenterOpen} onClose={() => setNotifCenterOpen(false)} />
     </div>
   );
 }

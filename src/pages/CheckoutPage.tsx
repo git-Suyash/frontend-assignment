@@ -27,15 +27,28 @@ const EMPTY_FORM: FormFields = {
   country: '',
 };
 
-function validationFailureMessage(reason: ValidationFailureReason): string {
+interface ValidationNotif {
+  type: 'success' | 'warning' | 'error' | 'info';
+  title: string;
+  message: string;
+}
+
+function validationFailureNotif(reason: ValidationFailureReason): ValidationNotif {
   switch (reason) {
-    case 'CART_EMPTY':       return 'Your cart is empty.';
-    case 'CART_LOCKED':      return 'A checkout is already in progress. Please wait.';
-    case 'CART_CONFLICT':    return 'Cart conflict detected — your cart was modified in another tab.';
-    case 'CHECKSUM_MISMATCH':return 'Cart integrity check failed. Your cart may have been tampered with.';
-    case 'PRICE_TAMPERING':  return 'Price tampering detected. Item prices do not match their locked values.';
-    case 'STALE_PRICE':      return 'Prices have changed since you added items. Please review your cart.';
-    case 'IDEMPOTENCY_REUSE':return 'This order was already submitted. Please refresh and try again.';
+    case 'CART_EMPTY':
+      return { type: 'warning', title: 'Empty cart', message: 'Add items to your cart before checking out.' };
+    case 'CART_LOCKED':
+      return { type: 'warning', title: 'Already in progress', message: 'A checkout is already in progress. Please wait.' };
+    case 'CART_CONFLICT':
+      return { type: 'error', title: 'Cart conflict', message: 'Resolve the cart conflict before checking out.' };
+    case 'CHECKSUM_MISMATCH':
+      return { type: 'error', title: 'Security check failed', message: 'Cart integrity could not be verified. Please review your cart.' };
+    case 'PRICE_TAMPERING':
+      return { type: 'error', title: 'Tampering detected', message: 'Product prices have been altered. Your cart has been reset to original prices.' };
+    case 'STALE_PRICE':
+      return { type: 'warning', title: 'Prices changed', message: 'Some items have new prices. Please review your cart.' };
+    case 'IDEMPOTENCY_REUSE':
+      return { type: 'warning', title: 'Duplicate attempt', message: 'This order has already been submitted.' };
   }
 }
 
@@ -105,26 +118,27 @@ export default function CheckoutPage() {
           type: 'TRANSITION',
           payload: { to: 'ORDER_INCONSISTENT', reason: 'Persistence failed after successful API call' },
         });
-        notify('error', 'Order status unclear', 'Order status unclear — please check below');
+        notify('error', 'Order status unclear', 'There was an issue saving your order. Please choose an action below.');
         auditLog('ORDER_INCONSISTENT', {
           cartVersion: cartState.version,
           cartItemCount: cartState.items.length,
         });
       } else {
-        orderDispatch({ type: 'SET_ORDER_ID', payload: { orderId: String(response.id) } });
+        const orderId = String(response.id);
+        orderDispatch({ type: 'SET_ORDER_ID', payload: { orderId } });
         orderDispatch({ type: 'TRANSITION', payload: { to: 'ORDER_SUCCESS' } });
         cartDispatch({ type: 'CLEAR_CART' });
-        notify('success', 'Order placed!', 'Order placed successfully!');
+        notify('success', 'Order confirmed!', `Your order #${orderId} has been placed successfully.`);
         auditLog('ORDER_SUCCESS', {
           cartVersion: cartState.version,
           cartItemCount: cartState.items.length,
         });
-        navigate(`/order/${response.id}`);
+        navigate(`/order/${orderId}`);
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unknown error';
       orderDispatch({ type: 'TRANSITION', payload: { to: 'ORDER_FAILED', reason: message } });
-      notify('error', 'Order failed', `Order failed — ${message}`);
+      notify('error', 'Order failed', "We couldn't process your order. You can retry or cancel.");
       auditLog('ORDER_FAILED', {
         cartVersion: cartState.version,
         reason: message,
@@ -142,7 +156,7 @@ export default function CheckoutPage() {
 
     setSubmitting(true);
     cartDispatch({ type: 'SET_LOCK', payload: { locked: true } });
-    notify('info', 'Validating order', 'Validating your order...');
+    notify('info', 'Validating', 'Checking your cart for issues...');
 
     const result = await validateCheckout(cartState);
 
@@ -150,7 +164,8 @@ export default function CheckoutPage() {
       cartDispatch({ type: 'SET_LOCK', payload: { locked: false } });
       orderDispatch({ type: 'TRANSITION', payload: { to: 'CART_READY' } });
       cartDispatch({ type: 'RESET_IDEMPOTENCY_KEY' });
-      notify('error', 'Validation failed', validationFailureMessage(result.reason));
+      const notif = validationFailureNotif(result.reason);
+      notify(notif.type, notif.title, notif.message);
       auditLog('CHECKOUT_BLOCKED', {
         cartVersion: cartState.version,
         reason: result.reason,
@@ -160,19 +175,22 @@ export default function CheckoutPage() {
     }
 
     orderDispatch({ type: 'TRANSITION', payload: { to: 'CHECKOUT_VALIDATED' } });
-    notify('success', 'Validation passed', 'Validation passed — submitting order...');
+    notify('success', 'Validation passed', 'Your order is ready to submit.');
     orderDispatch({ type: 'TRANSITION', payload: { to: 'ORDER_SUBMITTED' } });
+    notify('info', 'Submitting order', 'Please wait while we process your order...');
 
     await runSubmitOrder();
   }
 
   async function handleRetry() {
+    const attempt = orderState.retryCount + 1;
     cartDispatch({ type: 'RESET_IDEMPOTENCY_KEY' });
     orderDispatch({ type: 'INCREMENT_RETRY' });
     orderDispatch({ type: 'TRANSITION', payload: { to: 'ORDER_SUBMITTED' } });
+    notify('info', 'Retrying order', `Attempting to resubmit your order (attempt #${attempt}).`);
     auditLog('RETRY_INITIATED', {
       cartVersion: cartState.version,
-      reason: `Retry attempt ${orderState.retryCount + 1}`,
+      reason: `Retry attempt ${attempt}`,
     });
     cartDispatch({ type: 'SET_LOCK', payload: { locked: true } });
     setSubmitting(true);
@@ -182,7 +200,7 @@ export default function CheckoutPage() {
   function handleRollback() {
     orderDispatch({ type: 'TRANSITION', payload: { to: 'ROLLED_BACK' } });
     auditLog('ROLLBACK_INITIATED', { cartVersion: cartState.version });
-    notify('info', 'Order cancelled', 'Order cancelled. Your cart has been restored.');
+    notify('info', 'Order cancelled', 'Your order has been cancelled and your cart restored.');
     clearPersistedSession();
     orderDispatch({ type: 'RESET_ORDER' });
     navigate('/cart');

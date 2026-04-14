@@ -21,10 +21,10 @@ const TYPE_ICON: Record<NotificationType, string> = {
 };
 
 const TYPE_COLOR: Record<NotificationType, string> = {
-  success: 'text-green-600 bg-green-100',
-  warning: 'text-amber-600 bg-amber-100',
-  error: 'text-red-600 bg-red-100',
-  info: 'text-blue-600 bg-blue-100',
+  success: 'text-ok bg-ok-muted',
+  warning: 'text-warn bg-warn-muted',
+  error:   'text-bad bg-bad-muted',
+  info:    'text-note bg-note-muted',
 };
 
 function formatRelativeTime(timestamp: number): string {
@@ -137,7 +137,7 @@ export default function NotificationCenter({ open, onClose }: NotificationCenter
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/30 z-40"
+        className="fixed inset-0 bg-ink/20 z-40 backdrop-blur-sm"
         onClick={onClose}
         aria-hidden="true"
       />
@@ -148,23 +148,23 @@ export default function NotificationCenter({ open, onClose }: NotificationCenter
         role="dialog"
         aria-modal="true"
         aria-label="Notification center"
-        className="fixed top-0 right-0 h-full w-full sm:w-96 bg-white z-50 shadow-xl flex flex-col"
+        className="fixed top-0 right-0 h-full w-full sm:w-96 bg-surface z-50 shadow-2xl flex flex-col animate-slide-in-right"
         onKeyDown={handleKeyDown}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
-          <h2 className="text-base font-semibold text-gray-900">Notifications</h2>
-          <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+          <h2 className="font-display text-base font-bold text-ink">Notifications</h2>
+          <div className="flex items-center gap-1.5">
             <button
               onClick={handleCopyDiagnostic}
-              className="text-xs text-gray-500 hover:text-gray-700 border border-gray-200 rounded px-2 py-1 transition-colors relative"
+              className="text-xs text-ink-3 hover:text-ink border border-border rounded-lg px-2.5 py-1.5 transition-colors hover:bg-muted"
               title="Copy diagnostic info to clipboard"
             >
-              {copied ? 'Copied!' : 'Copy diagnostic'}
+              {copied ? 'Copied!' : 'Diagnostics'}
             </button>
             <button
               onClick={() => dispatch({ type: 'DISMISS_ALL' })}
-              className="text-xs text-gray-500 hover:text-gray-700 border border-gray-200 rounded px-2 py-1 transition-colors"
+              className="text-xs text-ink-3 hover:text-ink border border-border rounded-lg px-2.5 py-1.5 transition-colors hover:bg-muted"
             >
               Clear all
             </button>
@@ -172,7 +172,7 @@ export default function NotificationCenter({ open, onClose }: NotificationCenter
               ref={closeButtonRef}
               onClick={onClose}
               aria-label="Close notification center"
-              className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded"
+              className="text-ink-3 hover:text-ink transition-colors p-1.5 rounded-lg hover:bg-muted ml-1"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -182,15 +182,15 @@ export default function NotificationCenter({ open, onClose }: NotificationCenter
         </div>
 
         {/* Filter tabs */}
-        <div className="flex border-b border-gray-100 px-4 gap-1 overflow-x-auto">
+        <div className="flex border-b border-border px-5 gap-0.5 overflow-x-auto">
           {TABS.map(tab => (
             <button
               key={tab.value}
               onClick={() => setActiveTab(tab.value)}
-              className={`text-xs font-medium py-2 px-2 whitespace-nowrap border-b-2 transition-colors ${
+              className={`text-xs font-medium py-3 px-3 whitespace-nowrap border-b-2 transition-colors ${
                 activeTab === tab.value
-                  ? 'border-indigo-600 text-indigo-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
+                  ? 'border-gold text-gold'
+                  : 'border-transparent text-ink-3 hover:text-ink'
               }`}
             >
               {tab.label}
@@ -199,27 +199,32 @@ export default function NotificationCenter({ open, onClose }: NotificationCenter
         </div>
 
         {/* History list */}
-        <div className="flex-1 overflow-y-auto divide-y divide-gray-50">
+        <div className="flex-1 overflow-y-auto">
           {filtered.length === 0 ? (
-            <div className="text-center text-gray-400 text-sm py-12">No notifications</div>
+            <div className="text-center text-ink-3 text-sm py-16">
+              <p className="text-2xl mb-2">🔔</p>
+              No notifications
+            </div>
           ) : (
-            [...filtered].reverse().map(n => (
-              <div
-                key={n.id}
-                className={`flex gap-3 px-4 py-3 transition-opacity ${n.dismissed ? 'opacity-50' : ''}`}
-              >
-                <span
-                  className={`mt-0.5 text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full flex-shrink-0 ${TYPE_COLOR[n.type]}`}
+            <div className="divide-y divide-border">
+              {[...filtered].reverse().map(n => (
+                <div
+                  key={n.id}
+                  className={`flex gap-3 px-5 py-3.5 transition-opacity ${n.dismissed ? 'opacity-40' : ''}`}
                 >
-                  {TYPE_ICON[n.type]}
-                </span>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900">{n.title}</p>
-                  <p className="text-xs text-gray-500 mt-0.5 leading-snug">{n.message}</p>
-                  <p className="text-xs text-gray-400 mt-1">{formatRelativeTime(n.timestamp)}</p>
+                  <span
+                    className={`mt-0.5 text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full flex-shrink-0 ${TYPE_COLOR[n.type]}`}
+                  >
+                    {TYPE_ICON[n.type]}
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-ink">{n.title}</p>
+                    <p className="text-xs text-ink-2 mt-0.5 leading-relaxed">{n.message}</p>
+                    <p className="text-[11px] text-ink-3 mt-1">{formatRelativeTime(n.timestamp)}</p>
+                  </div>
                 </div>
-              </div>
-            ))
+              ))}
+            </div>
           )}
         </div>
       </div>

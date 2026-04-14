@@ -221,23 +221,27 @@ export default function CheckoutPage() {
   // Recovery banner (refresh during ORDER_SUBMITTED / ORDER_INCONSISTENT)
   if (showRecovery) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-xl border border-amber-300 shadow-md max-w-md w-full p-8 text-center">
-          <div className="text-4xl mb-4">⚠️</div>
-          <h2 className="text-xl font-bold text-gray-900 mb-2">Interrupted checkout</h2>
-          <p className="text-gray-600 mb-6">
+      <div className="min-h-screen bg-canvas flex items-center justify-center p-4">
+        <div className="bg-surface rounded-2xl border border-warn/30 shadow-md max-w-md w-full p-8 text-center">
+          <div className="w-14 h-14 rounded-full bg-warn-muted flex items-center justify-center mx-auto mb-5">
+            <svg className="w-7 h-7 text-warn" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <h2 className="font-display text-xl font-bold text-ink mb-2">Interrupted checkout</h2>
+          <p className="text-ink-2 text-sm mb-7">
             Your previous order was interrupted. Would you like to resume or start over?
           </p>
           <div className="flex gap-3 justify-center">
             <button
               onClick={() => setShowRecovery(false)}
-              className="bg-indigo-600 text-white px-5 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors"
+              className="bg-gold text-white px-6 py-2.5 rounded-xl font-semibold hover:bg-gold-dark transition-colors text-sm"
             >
               Resume
             </button>
             <button
               onClick={handleStartOver}
-              className="border border-gray-300 text-gray-700 px-5 py-2 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+              className="border border-border text-ink-2 px-6 py-2.5 rounded-xl font-semibold hover:bg-muted transition-colors text-sm"
             >
               Start over
             </button>
@@ -250,17 +254,17 @@ export default function CheckoutPage() {
   // ORDER_SUBMITTED: loading screen
   if (orderState.current === 'ORDER_SUBMITTED') {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-xl border border-gray-200 shadow-md max-w-sm w-full p-8 text-center">
-          <div className="flex justify-center mb-4">
-            <svg className="animate-spin h-10 w-10 text-indigo-600" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-              <path className="opacity-75" fill="currentColor"
+      <div className="min-h-screen bg-canvas flex items-center justify-center p-4">
+        <div className="bg-surface rounded-2xl border border-border shadow-md max-w-sm w-full p-10 text-center">
+          <div className="flex justify-center mb-5">
+            <svg className="animate-spin h-10 w-10 text-gold" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-80" fill="currentColor"
                 d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
             </svg>
           </div>
-          <h2 className="text-xl font-bold text-gray-900 mb-2">Submitting your order…</h2>
-          <p className="text-gray-500 text-sm">Please don't close this tab.</p>
+          <h2 className="font-display text-xl font-bold text-ink mb-2">Processing your order…</h2>
+          <p className="text-ink-3 text-sm">Please don't close this tab.</p>
         </div>
       </div>
     );
@@ -270,19 +274,26 @@ export default function CheckoutPage() {
   if (orderState.current === 'ORDER_FAILED' || orderState.current === 'ORDER_INCONSISTENT') {
     const isInconsistent = orderState.current === 'ORDER_INCONSISTENT';
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-xl border border-red-200 shadow-md max-w-md w-full p-8 text-center">
-          <div className="text-4xl mb-4">{isInconsistent ? '⚠️' : '❌'}</div>
-          <h2 className="text-xl font-bold text-gray-900 mb-1">
+      <div className="min-h-screen bg-canvas flex items-center justify-center p-4">
+        <div className="bg-surface rounded-2xl border border-bad/25 shadow-md max-w-md w-full p-8 text-center">
+          <div className={`w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-5 ${isInconsistent ? 'bg-warn-muted' : 'bg-bad-muted'}`}>
+            <svg className={`w-7 h-7 ${isInconsistent ? 'text-warn' : 'text-bad'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              {isInconsistent
+                ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                : <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              }
+            </svg>
+          </div>
+          <h2 className="font-display text-xl font-bold text-ink mb-1">
             {STATE_LABELS[orderState.current]}
           </h2>
           {orderState.failureReason && (
-            <p className="text-sm text-gray-500 mb-4 bg-gray-50 rounded px-3 py-2 text-left font-mono">
+            <p className="text-xs text-ink-3 mb-4 bg-muted rounded-lg px-3 py-2.5 text-left font-mono leading-relaxed">
               {orderState.failureReason}
             </p>
           )}
           {isInconsistent && (
-            <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded px-3 py-2 mb-4 text-left">
+            <p className="text-sm text-warn bg-warn-muted border border-warn/20 rounded-xl px-4 py-3 mb-4 text-left leading-relaxed">
               The order may have been processed by the server. Retrying may create a duplicate — a new idempotency key will be generated.
             </p>
           )}
@@ -290,20 +301,20 @@ export default function CheckoutPage() {
             <button
               onClick={handleRetry}
               disabled={submitting}
-              className="bg-indigo-600 text-white px-5 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors disabled:opacity-50"
+              className="bg-gold text-white px-6 py-2.5 rounded-xl font-semibold hover:bg-gold-dark transition-colors disabled:opacity-50 text-sm"
             >
               Retry order
             </button>
             <button
               onClick={handleRollback}
               disabled={submitting}
-              className="border border-gray-300 text-gray-700 px-5 py-2 rounded-lg font-medium hover:bg-gray-50 transition-colors disabled:opacity-50"
+              className="border border-border text-ink-2 px-6 py-2.5 rounded-xl font-semibold hover:bg-muted transition-colors disabled:opacity-50 text-sm"
             >
               Cancel &amp; restore cart
             </button>
           </div>
           {orderState.retryCount > 0 && (
-            <p className="text-xs text-gray-400 mt-3">Retry attempt #{orderState.retryCount}</p>
+            <p className="text-xs text-ink-3 mt-4">Retry attempt #{orderState.retryCount}</p>
           )}
         </div>
       </div>
@@ -312,23 +323,23 @@ export default function CheckoutPage() {
 
   // CART_READY / CHECKOUT_VALIDATED: checkout form + order summary
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
-        <div className="max-w-5xl mx-auto px-4 py-3 flex items-center gap-4">
-          <Link to="/cart" className="text-indigo-600 hover:text-indigo-700 text-sm font-medium flex items-center gap-1">
+    <div className="min-h-screen bg-canvas">
+      <header className="bg-surface border-b border-border sticky top-0 z-10">
+        <div className="max-w-5xl mx-auto px-5 py-4 flex items-center gap-4">
+          <Link to="/cart" className="text-ink-3 hover:text-ink text-sm font-medium flex items-center gap-1.5 transition-colors">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
-            Back to cart
+            Cart
           </Link>
-          <h1 className="text-xl font-bold text-gray-900">Checkout</h1>
+          <h1 className="font-display text-xl font-bold text-ink">Checkout</h1>
         </div>
       </header>
 
-      <main className="max-w-5xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <main className="max-w-5xl mx-auto px-5 py-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Checkout form */}
         <form ref={formRef} onSubmit={handlePlaceOrder} noValidate className="space-y-5">
-          <h2 className="text-lg font-semibold text-gray-900">Shipping details</h2>
+          <h2 className="text-base font-semibold text-ink">Shipping details</h2>
 
           <Field
             label="Full name"
@@ -394,47 +405,52 @@ export default function CheckoutPage() {
           <button
             type="submit"
             disabled={submitting || cartState.status === 'locked'}
-            className="w-full bg-indigo-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-base"
+            className="w-full bg-gold text-white py-3.5 px-4 rounded-xl font-semibold hover:bg-gold-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-base"
           >
             {submitting ? 'Processing…' : 'Place Order'}
           </button>
         </form>
 
         {/* Order summary panel */}
-        <div className="bg-white rounded-xl border border-gray-200 p-6 self-start lg:sticky lg:top-20">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">
-            Order Summary ({cartState.items.reduce((s, i) => s + i.quantity, 0)} items)
+        <div className="bg-surface rounded-2xl border border-border p-6 self-start lg:sticky lg:top-20 shadow-sm">
+          <h2 className="text-base font-semibold text-ink mb-5">
+            Order Summary
+            <span className="font-normal text-ink-3 ml-1.5 text-sm">
+              ({cartState.items.reduce((s, i) => s + i.quantity, 0)} items)
+            </span>
           </h2>
-          <ul className="divide-y divide-gray-100 mb-4">
+          <ul className="divide-y divide-border mb-5">
             {cartState.items.map(item => (
               <li key={item.product.id} className="py-3 flex items-center gap-3">
-                <img
-                  src={item.product.image}
-                  alt={item.product.title}
-                  className="w-10 h-10 object-cover rounded"
-                />
+                <div className="w-10 h-10 rounded-lg bg-canvas flex-shrink-0 flex items-center justify-center">
+                  <img
+                    src={item.product.image}
+                    alt={item.product.title}
+                    className="w-9 h-9 object-contain"
+                  />
+                </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm text-gray-800 truncate">{item.product.title}</p>
-                  <p className="text-xs text-gray-400">
+                  <p className="text-sm text-ink truncate">{item.product.title}</p>
+                  <p className="text-xs text-ink-3">
                     {item.quantity} × ${item.snapshotPrice.toFixed(2)}
                   </p>
                 </div>
-                <span className="text-sm font-medium text-gray-900">
+                <span className="text-sm font-semibold text-ink">
                   ${(item.snapshotPrice * item.quantity).toFixed(2)}
                 </span>
               </li>
             ))}
           </ul>
-          <div className="space-y-1 text-sm border-t border-gray-100 pt-3">
-            <div className="flex justify-between text-gray-600">
+          <div className="space-y-2 text-sm border-t border-border pt-4">
+            <div className="flex justify-between text-ink-2">
               <span>Subtotal</span>
               <span>${subtotal.toFixed(2)}</span>
             </div>
-            <div className="flex justify-between text-gray-600">
+            <div className="flex justify-between text-ink-2">
               <span>Shipping</span>
-              <span>$0.00</span>
+              <span>Free</span>
             </div>
-            <div className="flex justify-between font-bold text-gray-900 text-base pt-2 border-t border-gray-200">
+            <div className="flex justify-between font-bold text-ink text-base pt-2 border-t border-border">
               <span>Total</span>
               <span>${subtotal.toFixed(2)}</span>
             </div>
@@ -461,8 +477,9 @@ interface FieldProps {
 function Field({ label, name, type, value, error, onChange, required, minLength }: FieldProps) {
   return (
     <div>
-      <label htmlFor={name} className="block text-sm font-medium text-gray-700 mb-1">
+      <label htmlFor={name} className="block text-sm font-medium text-ink-2 mb-1.5">
         {label}
+        {required && <span className="text-bad ml-0.5">*</span>}
       </label>
       <input
         id={name}
@@ -472,11 +489,13 @@ function Field({ label, name, type, value, error, onChange, required, minLength 
         onChange={onChange}
         required={required}
         minLength={minLength}
-        className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
-          error ? 'border-red-400 bg-red-50' : 'border-gray-300'
+        className={`w-full border rounded-xl px-3.5 py-2.5 text-sm text-ink focus:outline-none focus:ring-2 transition-colors bg-canvas ${
+          error
+            ? 'border-bad/50 bg-bad-muted focus:ring-bad/20 focus:border-bad'
+            : 'border-border focus:ring-gold/25 focus:border-gold'
         }`}
       />
-      {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
+      {error && <p className="mt-1.5 text-xs text-bad">{error}</p>}
     </div>
   );
 }

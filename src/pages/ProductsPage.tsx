@@ -10,12 +10,16 @@ import NotificationCenter from '../components/NotificationCenter';
 
 function SkeletonCard() {
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-4 animate-pulse">
-      <div className="bg-gray-200 rounded h-48 mb-4" />
-      <div className="bg-gray-200 rounded h-4 mb-2" />
-      <div className="bg-gray-200 rounded h-4 w-2/3 mb-3" />
-      <div className="bg-gray-200 rounded h-6 w-1/3 mb-3" />
-      <div className="bg-gray-200 rounded h-9" />
+    <div className="bg-surface rounded-2xl p-5 animate-pulse shadow-sm">
+      <div className="bg-muted rounded-xl h-48 mb-4" />
+      <div className="bg-muted rounded-full h-4 w-20 mb-3" />
+      <div className="bg-muted rounded h-3 mb-2" />
+      <div className="bg-muted rounded h-3 w-3/4 mb-5" />
+      <div className="flex justify-between mb-4">
+        <div className="bg-muted rounded h-5 w-16" />
+        <div className="bg-muted rounded h-4 w-20" />
+      </div>
+      <div className="bg-muted rounded-lg h-10" />
     </div>
   );
 }
@@ -27,32 +31,33 @@ interface ProductCardProps {
 
 function ProductCard({ product, onAddToCart }: ProductCardProps) {
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-4 flex flex-col hover:shadow-md transition-shadow">
-      <div className="flex items-center justify-center h-48 mb-4">
+    <div className="bg-surface rounded-2xl p-5 flex flex-col shadow-sm hover:shadow-md transition-all duration-200 hover:-translate-y-0.5">
+      <div className="flex items-center justify-center h-48 mb-4 bg-canvas rounded-xl overflow-hidden">
         <img
           src={product.image}
           alt={product.title}
           loading="lazy"
-          className="max-h-48 max-w-full object-contain"
+          className="max-h-44 max-w-full object-contain p-2"
         />
       </div>
-      <span className="text-xs font-medium uppercase tracking-wide text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded self-start mb-2">
+      <span className="text-[11px] font-semibold uppercase tracking-wider text-gold-label bg-gold-muted px-2.5 py-1 rounded-full self-start mb-3">
         {product.category}
       </span>
-      <p className="text-sm font-medium text-gray-900 line-clamp-2 flex-1 mb-2">
+      <p className="text-sm font-medium text-ink line-clamp-2 flex-1 mb-3 leading-relaxed">
         {product.title}
       </p>
-      <div className="flex items-center justify-between mt-auto">
-        <span className="text-lg font-bold text-gray-900">
+      <div className="flex items-center justify-between mb-3.5">
+        <span className="text-xl font-bold text-ink">
           ${product.price.toFixed(2)}
         </span>
-        <span className="text-xs text-gray-400">
-          ★ {product.rating.rate} ({product.rating.count})
+        <span className="text-xs text-ink-3">
+          <span className="text-gold">★</span> {product.rating.rate}{' '}
+          <span className="opacity-60">({product.rating.count})</span>
         </span>
       </div>
       <button
         onClick={() => onAddToCart(product)}
-        className="mt-3 w-full bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors"
+        className="w-full bg-ink text-white text-sm font-medium py-2.5 px-4 rounded-xl transition-colors duration-150 hover:bg-ink/80"
       >
         Add to Cart
       </button>
@@ -81,32 +86,35 @@ export default function ProductsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-canvas">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-          <h1 className="text-xl font-bold text-gray-900">OpenCart</h1>
-          <div className="flex items-center gap-2">
+      <header className="bg-surface border-b border-border sticky top-0 z-10">
+        <div className="max-w-7xl mx-auto px-5 py-4 flex items-center justify-between">
+          <h1 className="font-display text-2xl font-bold text-ink tracking-tight">OpenCart</h1>
+          <div className="flex items-center gap-1">
             {/* Notification bell */}
             <button
               onClick={() => setNotifCenterOpen(true)}
               aria-label="Open notification center"
-              className="p-2 text-gray-500 hover:text-indigo-600 transition-colors"
+              className="p-2.5 text-ink-3 hover:text-ink rounded-xl hover:bg-muted transition-colors"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75}
                   d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
               </svg>
             </button>
 
             {/* Cart icon */}
-            <Link to="/cart" className="relative p-2 text-gray-600 hover:text-indigo-600 transition-colors">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+            <Link
+              to="/cart"
+              className="relative p-2.5 text-ink-3 hover:text-ink rounded-xl hover:bg-muted transition-colors"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75}
                   d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
               </svg>
               {cartItemCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-indigo-600 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
+                <span className="absolute -top-0.5 -right-0.5 bg-gold text-white text-[10px] font-bold min-w-[18px] h-[18px] rounded-full flex items-center justify-center px-1">
                   {cartItemCount > 99 ? '99+' : cartItemCount}
                 </span>
               )}
@@ -115,20 +123,20 @@ export default function ProductsPage() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 py-6">
+      <main className="max-w-7xl mx-auto px-5 py-7">
         {/* Search and filter toolbar */}
-        <div className="bg-white rounded-lg border border-gray-200 p-4 mb-6 flex flex-col sm:flex-row gap-3">
+        <div className="bg-surface rounded-xl border border-border p-4 mb-6 flex flex-col sm:flex-row gap-3 shadow-sm">
           <input
             type="search"
-            placeholder="Search products..."
+            placeholder="Search products…"
             value={rawSearch}
             onChange={e => setRawSearch(e.target.value)}
-            className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="flex-1 border border-border rounded-lg px-3.5 py-2.5 text-sm text-ink placeholder:text-ink-3 focus:outline-none focus:ring-2 focus:ring-gold/25 focus:border-gold bg-canvas transition-colors"
           />
           <select
             value={category}
             onChange={e => setCategory(e.target.value)}
-            className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="border border-border rounded-lg px-3.5 py-2.5 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-gold/25 focus:border-gold bg-canvas transition-colors"
           >
             <option value="all">All categories</option>
             {categories.map(cat => (
@@ -138,28 +146,28 @@ export default function ProductsPage() {
           <select
             value={sortBy}
             onChange={e => setSortBy(e.target.value as SortOption)}
-            className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="border border-border rounded-lg px-3.5 py-2.5 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-gold/25 focus:border-gold bg-canvas transition-colors"
           >
-            <option value="default">Default</option>
+            <option value="default">Default sort</option>
             <option value="price-asc">Price: Low to High</option>
             <option value="price-desc">Price: High to Low</option>
             <option value="name-asc">Name: A–Z</option>
             <option value="rating-desc">Top Rated</option>
           </select>
           {!loading && (
-            <span className="text-sm text-gray-500 self-center whitespace-nowrap">
-              Showing {filteredProducts.length} of {products.length} items
+            <span className="text-sm text-ink-3 self-center whitespace-nowrap">
+              {filteredProducts.length} of {products.length} items
             </span>
           )}
         </div>
 
         {/* Error state */}
         {error && (
-          <div className="text-center py-16">
-            <p className="text-red-600 mb-4">{error}</p>
+          <div className="text-center py-20">
+            <p className="text-bad mb-4 text-sm">{error}</p>
             <button
               onClick={() => window.location.reload()}
-              className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
+              className="bg-ink text-white px-5 py-2.5 rounded-xl hover:bg-ink/80 transition-colors font-medium text-sm"
             >
               Retry
             </button>
@@ -175,8 +183,10 @@ export default function ProductsPage() {
 
         {/* Empty state */}
         {!loading && !error && filteredProducts.length === 0 && (
-          <div className="text-center py-16 text-gray-500">
-            <p className="text-lg">No products match your search</p>
+          <div className="text-center py-24">
+            <p className="text-3xl mb-3">🔍</p>
+            <p className="text-base font-semibold text-ink mb-1">No products found</p>
+            <p className="text-sm text-ink-3">Try adjusting your search or filters</p>
           </div>
         )}
 

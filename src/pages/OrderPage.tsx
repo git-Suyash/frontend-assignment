@@ -43,14 +43,14 @@ export default function OrderPage() {
   const totalItems = cartState.items.reduce((sum, i) => sum + i.quantity, 0);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <main className="max-w-2xl mx-auto px-4 py-10 space-y-8">
+    <div className="min-h-screen bg-canvas">
+      <main className="max-w-2xl mx-auto px-5 py-10 space-y-5">
         {/* Success header */}
-        <div className="bg-white rounded-xl border border-green-200 shadow-sm p-8 text-center">
-          <div className="flex justify-center mb-4">
-            <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center">
+        <div className="bg-surface rounded-2xl border border-ok/25 shadow-sm p-8 text-center">
+          <div className="flex justify-center mb-5">
+            <div className="w-16 h-16 rounded-full bg-ok-muted flex items-center justify-center">
               <svg
-                className="w-9 h-9 text-green-600"
+                className="w-8 h-8 text-ok"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -64,22 +64,22 @@ export default function OrderPage() {
               </svg>
             </div>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-1">Order Confirmed!</h1>
-          <p className="text-lg text-indigo-600 font-semibold mb-2">Order #{id}</p>
-          <p className="text-gray-500 text-sm">
-            Thank you for your order. Estimated delivery: 3–5 business days.
+          <h1 className="font-display text-2xl font-bold text-ink mb-1.5">Order Confirmed!</h1>
+          <p className="text-base text-gold font-semibold mb-2">Order #{id}</p>
+          <p className="text-ink-3 text-sm">
+            Thank you for your purchase. Estimated delivery: 3–5 business days.
           </p>
         </div>
 
         {/* Order Timeline */}
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-          <h2 className="text-base font-semibold text-gray-900 mb-6">Order Timeline</h2>
+        <div className="bg-surface rounded-2xl border border-border shadow-sm p-6">
+          <h2 className="text-sm font-semibold text-ink mb-6 uppercase tracking-wider text-ink-3">Order Timeline</h2>
           <OrderTimeline orderState={orderState} />
         </div>
 
         {/* Order details */}
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-          <h2 className="text-base font-semibold text-gray-900 mb-4">
+        <div className="bg-surface rounded-2xl border border-border shadow-sm p-6">
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-ink-3 mb-4">
             {cartState.items.length > 0
               ? `Order Details (${totalItems} item${totalItems !== 1 ? 's' : ''})`
               : 'Order Details'}
@@ -87,41 +87,43 @@ export default function OrderPage() {
 
           {cartState.items.length > 0 ? (
             <>
-              <ul className="divide-y divide-gray-100 mb-4">
+              <ul className="divide-y divide-border mb-4">
                 {cartState.items.map(item => (
-                  <li key={item.product.id} className="py-3 flex items-center gap-3">
-                    <img
-                      src={item.product.image}
-                      alt={item.product.title}
-                      className="w-10 h-10 object-cover rounded"
-                    />
+                  <li key={item.product.id} className="py-3.5 flex items-center gap-3">
+                    <div className="w-11 h-11 rounded-lg bg-canvas flex-shrink-0 flex items-center justify-center">
+                      <img
+                        src={item.product.image}
+                        alt={item.product.title}
+                        className="w-10 h-10 object-contain"
+                      />
+                    </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm text-gray-800 truncate">{item.product.title}</p>
-                      <p className="text-xs text-gray-400">
+                      <p className="text-sm text-ink truncate">{item.product.title}</p>
+                      <p className="text-xs text-ink-3">
                         {item.quantity} × ${item.snapshotPrice.toFixed(2)}
                       </p>
                     </div>
-                    <span className="text-sm font-medium text-gray-900">
+                    <span className="text-sm font-bold text-ink">
                       ${(item.snapshotPrice * item.quantity).toFixed(2)}
                     </span>
                   </li>
                 ))}
               </ul>
-              <div className="border-t border-gray-100 pt-3 flex justify-between font-bold text-gray-900">
+              <div className="border-t border-border pt-4 flex justify-between font-bold text-ink">
                 <span>Total</span>
                 <span>${subtotal.toFixed(2)}</span>
               </div>
             </>
           ) : (
-            <p className="text-sm text-gray-500">Order complete. Cart has been cleared.</p>
+            <p className="text-sm text-ink-3">Order complete. Cart has been cleared.</p>
           )}
         </div>
 
         {/* Continue Shopping */}
-        <div className="text-center">
+        <div className="text-center pt-2">
           <button
             onClick={handleContinueShopping}
-            className="inline-block bg-indigo-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-colors"
+            className="inline-block bg-ink text-white px-8 py-3 rounded-xl font-semibold hover:bg-ink/80 transition-colors text-sm"
           >
             Continue Shopping
           </button>

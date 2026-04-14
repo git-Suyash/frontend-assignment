@@ -31,42 +31,50 @@ export default function CartPage() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-canvas">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
-        <div className="max-w-4xl mx-auto px-4 py-3 flex items-center gap-4">
-          <Link to="/" className="text-indigo-600 hover:text-indigo-700 text-sm font-medium flex items-center gap-1">
+      <header className="bg-surface border-b border-border sticky top-0 z-10">
+        <div className="max-w-4xl mx-auto px-5 py-4 flex items-center gap-4">
+          <Link
+            to="/"
+            className="text-ink-3 hover:text-ink text-sm font-medium flex items-center gap-1.5 transition-colors"
+          >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
-            Back to shop
+            Shop
           </Link>
-          <h1 className="text-xl font-bold text-gray-900 flex-1">
-            Your Cart ({totalItems} {totalItems === 1 ? 'item' : 'items'})
+          <h1 className="font-display text-xl font-bold text-ink flex-1">
+            Your Cart
+            {totalItems > 0 && (
+              <span className="font-sans text-sm font-normal text-ink-3 ml-2">
+                ({totalItems} {totalItems === 1 ? 'item' : 'items'})
+              </span>
+            )}
           </h1>
           <button
             onClick={() => setNotifCenterOpen(true)}
             aria-label="Open notification center"
-            className="relative p-2 text-gray-500 hover:text-indigo-600 transition-colors"
+            className="p-2.5 text-ink-3 hover:text-ink rounded-xl hover:bg-muted transition-colors"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75}
                 d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
             </svg>
           </button>
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 py-6">
+      <main className="max-w-4xl mx-auto px-5 py-7">
         {/* Conflict banner */}
         {state.status === 'conflict' && (
-          <div className="mb-4 bg-amber-50 border border-amber-300 rounded-lg px-4 py-3 flex items-start justify-between gap-4">
-            <p className="text-sm text-amber-800">
+          <div className="mb-5 bg-warn-muted border border-warn/30 rounded-xl px-4 py-3 flex items-start justify-between gap-4">
+            <p className="text-sm text-warn">
               Your cart was modified in another tab. Please review before checking out.
             </p>
             <button
               onClick={dismissConflict}
-              className="text-amber-700 hover:text-amber-900 text-sm font-medium whitespace-nowrap"
+              className="text-warn hover:text-warn/70 text-sm font-semibold whitespace-nowrap transition-colors"
             >
               Dismiss
             </button>
@@ -75,13 +83,13 @@ export default function CartPage() {
 
         {/* Empty cart */}
         {items.length === 0 ? (
-          <div className="text-center py-24">
-            <div className="text-6xl mb-4">🛒</div>
-            <h2 className="text-xl font-semibold text-gray-700 mb-2">Your cart is empty</h2>
-            <p className="text-gray-500 mb-6">Add some products to get started.</p>
+          <div className="text-center py-28">
+            <div className="text-5xl mb-5">🛒</div>
+            <h2 className="text-xl font-semibold text-ink mb-2">Your cart is empty</h2>
+            <p className="text-ink-3 text-sm mb-7">Add some products to get started.</p>
             <Link
               to="/"
-              className="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+              className="bg-ink text-white px-6 py-2.5 rounded-xl hover:bg-ink/80 transition-colors font-medium text-sm"
             >
               Browse products
             </Link>
@@ -89,7 +97,7 @@ export default function CartPage() {
         ) : (
           <div className="flex flex-col lg:flex-row gap-6">
             {/* Virtualized list */}
-            <div className="flex-1 bg-white rounded-lg border border-gray-200 overflow-hidden">
+            <div className="flex-1 bg-surface rounded-2xl border border-border overflow-hidden shadow-sm">
               <List<CartRowExtraProps>
                 rowComponent={CartRow}
                 rowProps={{ items, dispatch, onItemRemoved: handleItemRemoved }}
@@ -100,22 +108,26 @@ export default function CartPage() {
             </div>
 
             {/* Summary panel */}
-            <div className="lg:w-72 bg-white rounded-lg border border-gray-200 p-5 lg:sticky lg:top-20 self-start">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Order Summary</h2>
-              <div className="space-y-2 mb-4">
-                <div className="flex justify-between text-sm text-gray-600">
+            <div className="lg:w-72 bg-surface rounded-2xl border border-border p-6 lg:sticky lg:top-20 self-start shadow-sm">
+              <h2 className="text-base font-semibold text-ink mb-5">Order Summary</h2>
+              <div className="space-y-2.5 mb-5">
+                <div className="flex justify-between text-sm text-ink-2">
                   <span>Items ({totalItems})</span>
                   <span>${subtotal.toFixed(2)}</span>
                 </div>
-                <div className="border-t border-gray-200 pt-2 flex justify-between font-semibold text-gray-900">
-                  <span>Subtotal</span>
+                <div className="flex justify-between text-sm text-ink-2">
+                  <span>Shipping</span>
+                  <span>Free</span>
+                </div>
+                <div className="border-t border-border pt-2.5 flex justify-between font-bold text-ink">
+                  <span>Total</span>
                   <span>${subtotal.toFixed(2)}</span>
                 </div>
               </div>
               <button
                 onClick={() => navigate('/checkout')}
                 disabled={items.length === 0 || state.status === 'locked'}
-                className="w-full bg-indigo-600 text-white py-2.5 px-4 rounded-lg font-medium hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-gold text-white py-3 px-4 rounded-xl font-semibold hover:bg-gold-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
               >
                 Proceed to Checkout
               </button>

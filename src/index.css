@@ -1,10 +1,70 @@
 @import "tailwindcss";
 
-@keyframes toast-shrink {
-  from { width: 100%; }
-  to { width: 0%; }
+@theme {
+  /* Typography */
+  --font-display: "Playfair Display", Georgia, serif;
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+
+  /* Backgrounds */
+  --color-canvas: #F8F7F3;
+  --color-surface: #FFFFFF;
+  --color-muted: #EDECE7;
+
+  /* Borders */
+  --color-border: #E3DFD7;
+  --color-border-strong: #C4BFB5;
+
+  /* Text */
+  --color-ink: #1A1910;
+  --color-ink-2: #655F54;
+  --color-ink-3: #96928A;
+
+  /* Accent — amber gold */
+  --color-gold: #B88A18;
+  --color-gold-dark: #9A720F;
+  --color-gold-muted: #FAF1DE;
+  --color-gold-label: #7A5608;
+
+  /* Semantic states */
+  --color-ok: #2E7A50;
+  --color-ok-muted: #E8F5EE;
+  --color-bad: #BE3A2C;
+  --color-bad-muted: #FCEBE9;
+  --color-warn: #B85E00;
+  --color-warn-muted: #FEF1E2;
+  --color-note: #1A5EA8;
+  --color-note-muted: #E8F0FB;
 }
 
+/* ── Base ─────────────────────────────────────────── */
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-canvas);
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Animations ───────────────────────────────────── */
+@keyframes toast-shrink {
+  from { width: 100%; }
+  to   { width: 0%; }
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-in-right {
+  from { transform: translateX(105%); }
+  to   { transform: translateX(0); }
+}
+
+.animate-fade-up        { animation: fade-up 0.18s ease-out both; }
+.animate-slide-in-right { animation: slide-in-right 0.22s ease-out both; }
+
+/* ── Accessibility ────────────────────────────────── */
 .sr-only {
   position: absolute;
   width: 1px;
@@ -15,4 +75,4 @@
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
-} 
+}

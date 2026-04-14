@@ -18,7 +18,7 @@ function OfflineBanner() {
     <div
       role="status"
       aria-live="polite"
-      className="fixed top-0 left-0 right-0 z-[60] bg-amber-500 text-white text-sm font-medium text-center py-2 px-4"
+      className="fixed top-0 left-0 right-0 z-[60] bg-warn text-white text-sm font-medium text-center py-2 px-4"
     >
       You are currently offline. Some features may be unavailable.
     </div>

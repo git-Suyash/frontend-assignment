@@ -67,44 +67,45 @@ interface NodeProps {
 function TimelineNode({ step, isLast, retryCount, failureReason }: NodeProps) {
   const { state, status, timestamp } = step;
 
-  const circleClass =
-    status === 'completed'
-      ? 'bg-green-500 border-green-500'
-      : status === 'current'
-      ? 'bg-blue-500 border-blue-500 animate-pulse'
-      : status === 'failed'
-      ? 'bg-red-500 border-red-500'
-      : 'bg-white border-gray-300';
+  const dotClass =
+    status === 'completed' ? 'bg-ok border-ok'
+    : status === 'current'    ? 'bg-note border-note animate-pulse'
+    : status === 'failed'     ? 'bg-bad border-bad'
+    : 'bg-surface border-border-strong';
 
   const labelClass =
-    status === 'completed'
-      ? 'text-gray-500'
-      : status === 'current'
-      ? 'text-blue-700 font-semibold'
-      : status === 'failed'
-      ? 'text-red-700 font-semibold'
-      : 'text-gray-400';
+    status === 'completed' ? 'text-ink-2'
+    : status === 'current'  ? 'text-note font-semibold'
+    : status === 'failed'   ? 'text-bad font-semibold'
+    : 'text-ink-3';
+
+  const statusLabel =
+    status === 'completed' ? 'Done'
+    : status === 'current'  ? 'Active'
+    : status === 'failed'   ? 'Failed'
+    : 'Pending';
+
+  const statusColor =
+    status === 'completed' ? 'text-ok'
+    : status === 'current'  ? 'text-note'
+    : status === 'failed'   ? 'text-bad'
+    : 'text-ink-3';
 
   return (
-    /* Mobile: flex-col item; Desktop: flex-1 */
     <div className="flex md:flex-col items-start md:items-center gap-3 md:gap-1 flex-1 relative">
-      {/* Connector line (left of circle on mobile, above on desktop) */}
+      {/* Connector line */}
       {!isLast && (
         <div
-          className={`hidden md:block absolute top-3 left-1/2 w-full h-0.5 ${
-            status === 'completed' || step.status === 'current'
-              ? 'bg-green-400'
-              : 'border-t-2 border-dashed border-gray-300 bg-transparent'
+          className={`hidden md:block absolute top-3 left-1/2 w-full h-px ${
+            status === 'completed' ? 'bg-ok/40' : 'bg-border'
           }`}
           aria-hidden="true"
         />
       )}
 
-      {/* Circle */}
+      {/* Dot */}
       <div className="relative z-10 flex-shrink-0">
-        <div
-          className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${circleClass}`}
-        >
+        <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${dotClass}`}>
           {status === 'completed' && (
             <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
@@ -124,28 +125,16 @@ function TimelineNode({ step, isLast, retryCount, failureReason }: NodeProps) {
           {STATE_LABELS[state]}
         </p>
         {timestamp && (
-          <p className="text-xs text-gray-400 mt-0.5">{formatTime(timestamp)}</p>
+          <p className="text-[11px] text-ink-3 mt-0.5">{formatTime(timestamp)}</p>
         )}
-        <p className={`text-xs mt-0.5 ${
-          status === 'completed' ? 'text-green-600' :
-          status === 'current' ? 'text-blue-600' :
-          status === 'failed' ? 'text-red-600' :
-          'text-gray-400'
-        }`}>
-          {status === 'completed' ? 'Completed' :
-           status === 'current' ? 'Current' :
-           status === 'failed' ? 'Failed' :
-           'Pending'}
-        </p>
-        {/* Retry count under ORDER_SUBMITTED */}
+        <p className={`text-[11px] mt-0.5 ${statusColor}`}>{statusLabel}</p>
         {state === 'ORDER_SUBMITTED' && retryCount > 0 && (
-          <p className="text-xs text-amber-600 mt-0.5">Attempt #{retryCount + 1}</p>
+          <p className="text-[11px] text-warn mt-0.5">Attempt #{retryCount + 1}</p>
         )}
-        {/* Failure reason under failed terminal nodes */}
         {(state === 'ORDER_FAILED' || state === 'ORDER_INCONSISTENT') &&
           status === 'failed' &&
           failureReason && (
-            <p className="text-xs text-red-500 mt-1 max-w-[120px] leading-tight">
+            <p className="text-[11px] text-bad mt-1 max-w-[120px] leading-tight">
               {failureReason}
             </p>
           )}
@@ -163,14 +152,13 @@ export default function OrderTimeline({ orderState }: OrderTimelineProps) {
 
   return (
     <div className="w-full">
-      {/* Mobile: vertical (flex-col) / Desktop: horizontal (flex-row) */}
-      <div className="flex flex-col md:flex-row md:items-start gap-0 md:gap-0 relative">
-        {/* Mobile vertical connector line */}
+      {/* Mobile: vertical / Desktop: horizontal */}
+      <div className="flex flex-col md:flex-row md:items-start gap-0 relative">
+        {/* Mobile vertical connector */}
         <div
-          className="md:hidden absolute left-3 top-6 bottom-6 w-0.5 bg-gray-200"
+          className="md:hidden absolute left-3 top-6 bottom-6 w-px bg-border"
           aria-hidden="true"
         />
-
         {steps.map((step, i) => (
           <TimelineNode
             key={step.state}

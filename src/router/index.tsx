@@ -5,6 +5,7 @@ const ProductsPage = lazy(() => import('../pages/ProductsPage'));
 const CartPage = lazy(() => import('../pages/CartPage'));
 const CheckoutPage = lazy(() => import('../pages/CheckoutPage'));
 const OrderPage = lazy(() => import('../pages/OrderPage'));
+const OfflinePage = lazy(() => import('../pages/OfflinePage'));
 
 function PageSkeleton() {
   return (
@@ -55,6 +56,14 @@ export const router = createBrowserRouter([
     element: (
       <Suspense fallback={<PageSkeleton />}>
         <OrderPage />
+      </Suspense>
+    ),
+  },
+  {
+    path: '/offline',
+    element: (
+      <Suspense fallback={<PageSkeleton />}>
+        <OfflinePage />
       </Suspense>
     ),
   },

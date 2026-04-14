@@ -1,75 +1,85 @@
-# React + TypeScript + Vite
+# OpenCart — Secure Checkout Demo
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A high-performance, security-aware checkout application built with React 19, TypeScript, and Tailwind CSS.
 
-Currently, two official plugins are available:
+## Prerequisites
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- [Bun](https://bun.sh) v1.0 or later
 
-## React Compiler
+## Getting Started
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+```bash
+# Install dependencies
+bun install
 
-Note: This will impact Vite dev & build performances.
+# Start development server (with HMR)
+bun run dev
 
-## Expanding the ESLint configuration
+# Build for production
+bun run build
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# Preview production build locally
+bun run preview
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Development Tools
+
+In the browser console during development, the following globals are available:
 
 ```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+// Simulate tampering attacks (for demo/testing)
+window.__devTools.simulatePriceTampering(productId, newPrice)
+window.__devTools.simulateChecksumTampering()
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+// Inspect live application state
+window.__app.getCartState()
+window.__app.getOrderState()
+window.__app.getAuditLog()
+window.__app.getNotifHistory()
 ```
+
+## Project Structure
+
+```
+src/
+├── components/     Reusable UI components
+├── contexts/       React Context providers (Cart, Order, Notification)
+├── hooks/          Custom hooks
+├── machines/       Order state machine
+├── pages/          Route-level page components (lazy-loaded)
+├── reducers/       Pure reducer functions
+├── router/         Browser router configuration
+├── services/       API and order submission services
+├── types/          Shared TypeScript types
+└── utils/          Pure utility functions (FNV-1a, audit log, logger, …)
+
+docs/               Written deliverables
+public/icons/       PWA icon assets
+```
+
+## Key Features
+
+- **600-product catalog** with search, filter, and sort
+- **Virtualized cart list** (react-window) — only visible rows rendered
+- **7-check security validation pipeline** at checkout
+- **FNV-1a checksum integrity** on cart contents
+- **Price tampering detection** via snapshotPrice comparison
+- **Cross-tab conflict detection** via StorageEvent
+- **Idempotency key** per checkout attempt (consume-once)
+- **Order state machine** with explicit valid transitions
+- **Toast notification system** with ARIA live regions
+- **Notification Center** with history, filters, and diagnostic export
+- **Order timeline** visualization
+- **PWA** with service worker, offline support, and installability
+- **Structured logging** (DEV only) with feature namespaces
+
+## Documentation
+
+See the [`docs/`](docs/) folder for:
+
+- [`ARCHITECTURE.md`](docs/ARCHITECTURE.md) — Stack, context ownership, data flow, state machine
+- [`EDGE_CASES.md`](docs/EDGE_CASES.md) — All security and UX edge cases with detection mechanisms
+- [`PERFORMANCE.md`](docs/PERFORMANCE.md) — Performance techniques with evidence
+- [`SECURITY.md`](docs/SECURITY.md) — Threat model, detection table, audit log format
+- [`NOTIFICATIONS.md`](docs/NOTIFICATIONS.md) — Queue rules, dedup algorithm, ARIA, trigger table
+- [`ORIGINALITY.md`](docs/ORIGINALITY.md) — Library inventory and API attribution

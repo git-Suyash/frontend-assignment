@@ -39,21 +39,17 @@ export function notifReducer(state: NotifState, action: NotificationAction): Not
     }
 
     case 'DISMISS':
+      // Remove from active queue; history already holds the permanent record
       return {
         ...state,
-        queue: state.queue.map(n =>
-          n.id === action.payload.id ? { ...n, dismissed: true } : n
-        ),
+        queue: state.queue.filter(n => n.id !== action.payload.id),
       };
 
     case 'DISMISS_ALL':
-      return {
-        ...state,
-        queue: state.queue.map(n => ({ ...n, dismissed: true })),
-      };
+      return { ...state, queue: [] };
 
     case 'CLEAR_HISTORY':
-      return { ...state, history: [] };
+      return { ...state, history: [], queue: [] };
 
     default:
       return state;

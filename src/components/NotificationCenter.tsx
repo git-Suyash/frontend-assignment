@@ -163,7 +163,7 @@ export default function NotificationCenter({ open, onClose }: NotificationCenter
               {copied ? 'Copied!' : 'Diagnostics'}
             </button>
             <button
-              onClick={() => dispatch({ type: 'DISMISS_ALL' })}
+              onClick={() => dispatch({ type: 'CLEAR_HISTORY' })}
               className="text-xs text-ink-3 hover:text-ink border border-border rounded-lg px-2.5 py-1.5 transition-colors hover:bg-muted"
             >
               Clear all

@@ -9,7 +9,6 @@ import {
 import type { CartState, CartAction } from '../types';
 import { cartReducer, initialCartState } from '../reducers/cartReducer';
 import { persistCart, loadCart, CART_STORAGE_KEY } from '../utils/storage';
-import { useNotification } from './NotificationContext';
 
 interface CartContextValue {
   state: CartState;
@@ -20,7 +19,6 @@ export const CartContext = createContext<CartContextValue | null>(null);
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(cartReducer, initialCartState);
-  const { notify } = useNotification();
 
   // Hydrate from localStorage on mount
   useEffect(() => {
@@ -45,23 +43,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
     persistCart(state);
   }, [state]);
 
-  // Cross-tab sync
+  // Cross-tab sync — silently apply updates from other tabs
   useEffect(() => {
     function handleStorage(event: StorageEvent) {
       if (event.key === CART_STORAGE_KEY && event.newValue) {
         try {
           const parsed = JSON.parse(event.newValue) as CartState;
-          if (parsed.version > state.version) {
+          if (parsed.version !== state.version) {
             dispatch({ type: 'SYNC_FROM_STORAGE', payload: parsed });
-            dispatch({
-              type: 'SET_STATUS',
-              payload: { status: 'conflict' },
-            });
-            notify(
-              'warning',
-              'Cart conflict',
-              'Your cart was modified in another tab. Review before checkout.'
-            );
           }
         } catch {
           // ignore malformed storage values
@@ -71,7 +60,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
     window.addEventListener('storage', handleStorage);
     return () => window.removeEventListener('storage', handleStorage);
-  }, [state.version, notify]);
+  }, [state.version]);
 
   return (
     <CartContext.Provider value={{ state, dispatch }}>

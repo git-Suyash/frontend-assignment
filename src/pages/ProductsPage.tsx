@@ -5,7 +5,7 @@ import { useNotification } from '../contexts/NotificationContext';
 import { useProducts } from '../hooks/useProducts';
 import { useDebounce } from '../hooks/useDebounce';
 import { useProductFilter, type SortOption } from '../hooks/useProductFilter';
-import type { Product } from '../types';
+import type { Product, CartItem } from '../types';
 import NotificationCenter from '../components/NotificationCenter';
 
 function SkeletonCard() {
@@ -26,26 +26,43 @@ function SkeletonCard() {
 
 interface ProductCardProps {
   product: Product;
+  cartItem: CartItem | undefined;
   onAddToCart: (product: Product) => void;
+  onIncrement: (productId: number, currentQty: number) => void;
+  onDecrement: (productId: number, currentQty: number) => void;
 }
 
-function ProductCard({ product, onAddToCart }: ProductCardProps) {
+function ProductCard({ product, cartItem, onAddToCart, onIncrement, onDecrement }: ProductCardProps) {
+  const inCart = !!cartItem;
+
   return (
-    <div className="bg-surface rounded-2xl p-5 flex flex-col shadow-sm hover:shadow-md transition-all duration-200 hover:-translate-y-0.5">
-      <div className="flex items-center justify-center h-48 mb-4 bg-canvas rounded-xl overflow-hidden">
+    <div className="bg-surface rounded-2xl p-5 flex flex-col shadow-sm hover:shadow-lg transition-all duration-200 hover:-translate-y-1 group">
+      {/* Image */}
+      <div className="flex items-center justify-center h-48 mb-4 bg-canvas rounded-xl overflow-hidden relative">
         <img
           src={product.image}
           alt={product.title}
           loading="lazy"
-          className="max-h-44 max-w-full object-contain p-2"
+          className="max-h-44 max-w-full object-contain p-2 transition-transform duration-300 group-hover:scale-105"
         />
+        {inCart && (
+          <span className="absolute top-2 right-2 bg-ok text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
+            ✓ In Cart
+          </span>
+        )}
       </div>
+
+      {/* Category badge */}
       <span className="text-[11px] font-semibold uppercase tracking-wider text-gold-label bg-gold-muted px-2.5 py-1 rounded-full self-start mb-3">
         {product.category}
       </span>
+
+      {/* Title */}
       <p className="text-sm font-medium text-ink line-clamp-2 flex-1 mb-3 leading-relaxed">
         {product.title}
       </p>
+
+      {/* Price + rating */}
       <div className="flex items-center justify-between mb-3.5">
         <span className="text-xl font-bold text-ink">
           ${product.price.toFixed(2)}
@@ -55,12 +72,44 @@ function ProductCard({ product, onAddToCart }: ProductCardProps) {
           <span className="opacity-60">({product.rating.count})</span>
         </span>
       </div>
-      <button
-        onClick={() => onAddToCart(product)}
-        className="w-full bg-ink text-white text-sm font-medium py-2.5 px-4 rounded-xl transition-colors duration-150 hover:bg-ink/80"
-      >
-        Add to Cart
-      </button>
+
+      {/* Action area */}
+      {inCart ? (
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-xs font-semibold text-ok flex items-center gap-1">
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+            </svg>
+            In cart
+          </span>
+          <div className="flex items-center gap-0 bg-muted rounded-xl overflow-hidden border border-border">
+            <button
+              onClick={() => onDecrement(product.id, cartItem.quantity)}
+              aria-label="Decrease quantity"
+              className="px-3 py-2 text-ink-2 font-bold text-base hover:bg-border-strong/40 hover:text-ink active:scale-90 transition-all duration-100 cursor-pointer select-none"
+            >
+              −
+            </button>
+            <span className="px-2.5 py-2 text-sm font-semibold text-ink min-w-[2rem] text-center tabular-nums">
+              {cartItem.quantity}
+            </span>
+            <button
+              onClick={() => onIncrement(product.id, cartItem.quantity)}
+              aria-label="Increase quantity"
+              className="px-3 py-2 text-ink-2 font-bold text-base hover:bg-border-strong/40 hover:text-ink active:scale-90 transition-all duration-100 cursor-pointer select-none"
+            >
+              +
+            </button>
+          </div>
+        </div>
+      ) : (
+        <button
+          onClick={() => onAddToCart(product)}
+          className="w-full bg-ink text-white text-sm font-medium py-2.5 px-4 rounded-xl transition-all duration-150 hover:bg-ink/85 hover:shadow-md active:scale-[0.97] active:shadow-none cursor-pointer"
+        >
+          Add to Cart
+        </button>
+      )}
     </div>
   );
 }
@@ -85,6 +134,20 @@ export default function ProductsPage() {
     notify('success', 'Cart updated', `${product.title} added to your cart`);
   }
 
+  function handleIncrement(productId: number, currentQty: number) {
+    cartDispatch({ type: 'UPDATE_QUANTITY', payload: { productId, quantity: currentQty + 1 } });
+  }
+
+  function handleDecrement(productId: number, currentQty: number) {
+    if (currentQty <= 1) {
+      const item = cartState.items.find(i => i.product.id === productId);
+      cartDispatch({ type: 'REMOVE_ITEM', payload: { productId } });
+      if (item) notify('info', 'Item removed', `${item.product.title} removed from cart`);
+    } else {
+      cartDispatch({ type: 'UPDATE_QUANTITY', payload: { productId, quantity: currentQty - 1 } });
+    }
+  }
+
   return (
     <div className="min-h-screen bg-canvas">
       {/* Header */}
@@ -96,7 +159,7 @@ export default function ProductsPage() {
             <button
               onClick={() => setNotifCenterOpen(true)}
               aria-label="Open notification center"
-              className="p-2.5 text-ink-3 hover:text-ink rounded-xl hover:bg-muted transition-colors"
+              className="p-2.5 text-ink-3 hover:text-ink rounded-xl hover:bg-muted active:scale-95 transition-all duration-150 cursor-pointer"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75}
@@ -107,7 +170,7 @@ export default function ProductsPage() {
             {/* Cart icon */}
             <Link
               to="/cart"
-              className="relative p-2.5 text-ink-3 hover:text-ink rounded-xl hover:bg-muted transition-colors"
+              className="relative p-2.5 text-ink-3 hover:text-ink rounded-xl hover:bg-muted active:scale-95 transition-all duration-150"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75}
@@ -167,7 +230,7 @@ export default function ProductsPage() {
             <p className="text-bad mb-4 text-sm">{error}</p>
             <button
               onClick={() => window.location.reload()}
-              className="bg-ink text-white px-5 py-2.5 rounded-xl hover:bg-ink/80 transition-colors font-medium text-sm"
+              className="bg-ink text-white px-5 py-2.5 rounded-xl hover:bg-ink/85 hover:shadow-md active:scale-[0.97] transition-all duration-150 font-medium text-sm cursor-pointer"
             >
               Retry
             </button>
@@ -197,7 +260,10 @@ export default function ProductsPage() {
               <ProductCard
                 key={product.id}
                 product={product}
+                cartItem={cartState.items.find(i => i.product.id === product.id)}
                 onAddToCart={handleAddToCart}
+                onIncrement={handleIncrement}
+                onDecrement={handleDecrement}
               />
             ))}
           </div>

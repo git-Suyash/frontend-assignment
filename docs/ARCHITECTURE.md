@@ -23,7 +23,7 @@
 App
 └── NotificationProvider  ← owns: { queue[], history[] }
     └── OrderProvider     ← owns: { current, orderId, timestamps, retryCount, failureReason }
-        └── CartProvider  ← owns: { items[], version, checksum, baselineSnapshot, idempotencyKey, status }
+        └── CartProvider  ← owns: { items[], version, checksum, idempotencyKey, status }
             ├── NotificationQueue      (reads NotificationContext)
             ├── OfflineBanner          (reads useOnlineStatus hook — no context)
             ├── DevBridge (DEV only)   (reads all three contexts → window.__app)
@@ -59,7 +59,7 @@ Each context is consumed only by components that need it. No prop-drilling occur
 | State | Label | Valid Transitions | Trigger |
 |---|---|---|---|
 | `CART_READY` | Cart ready | `CHECKOUT_VALIDATED` | User submits checkout form |
-| `CHECKOUT_VALIDATED` | Checkout validated | `ORDER_SUBMITTED`, `CART_READY` | All 7 security checks pass; or validation fails |
+| `CHECKOUT_VALIDATED` | Checkout validated | `ORDER_SUBMITTED`, `CART_READY` | All 10 security checks pass; or validation fails |
 | `ORDER_SUBMITTED` | Order submitted | `ORDER_SUCCESS`, `ORDER_FAILED`, `ORDER_INCONSISTENT` | `submitOrder()` resolves or rejects |
 | `ORDER_SUCCESS` | Order successful | *(terminal)* | API returns 201, no partial failure |
 | `ORDER_FAILED` | Order failed | `ORDER_SUBMITTED`, `ROLLED_BACK` | Network/API error thrown |

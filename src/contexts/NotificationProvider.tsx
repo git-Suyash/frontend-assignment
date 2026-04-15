@@ -30,7 +30,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   /**
    * Builds a PUSH action with an auto-generated dedupKey and dispatches it.
    * The dedupKey format is `"${type}:${title}"` — duplicate notifications
-   * within a 3-second window are silently dropped by the reducer.
+   * within a 1-second window are silently dropped by the reducer.
    */
   function notify(type: NotificationType, title: string, message: string) {
     dispatch({
@@ -39,7 +39,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
         type,
         title,
         message,
-        dedupKey: `${type}:${title}`,
+        dedupKey: `${type}:${crypto.randomUUID()}`, // Unique key to prevent unintended deduplication
       },
     });
   }

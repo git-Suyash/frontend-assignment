@@ -27,11 +27,11 @@ import { useState, useEffect, useRef } from 'react';
 import type { Product } from '../types';
 import { fetchProducts, fetchCategories } from '../services/api';
 import { expandProducts } from '../utils/expandProducts';
-import { useCart } from './useCart';
 import { useOnlineStatus } from './useOnlineStatus';
 import {
   getCachedCatalog,
   setCachedCatalog,
+  setPriceBaseline,
   isCatalogStale,
   CATALOG_TTL_MS,
 } from '../utils/catalogDb';
@@ -56,7 +56,6 @@ export function useProducts(): UseProductsResult {
   const [catalogSource, setCatalogSource] = useState<CatalogSource>('network');
   const [revalidating, setRevalidating] = useState(false);
 
-  const { dispatch } = useCart();
   const { isOnline } = useOnlineStatus();
 
   // Track whether we've already loaded an initial catalog this session so that
@@ -64,11 +63,10 @@ export function useProducts(): UseProductsResult {
   const loadedAtRef = useRef<number | null>(null);
 
   function applyProducts(expanded: Product[], cats: string[], source: CatalogSource) {
-    const priceMap: Record<number, number> = {};
-    for (const p of expanded) {
-      priceMap[p.id] = p.price;
-    }
-    dispatch({ type: 'SET_BASELINE_SNAPSHOT', payload: priceMap });
+    // Write a tamper-evident price baseline to IndexedDB. This is a
+    // fire-and-forget write — failure is non-fatal and will be caught by the
+    // BASELINE_MISSING audit event at checkout time.
+    setPriceBaseline(expanded);
     setProducts(expanded);
     setCategories(cats);
     setCatalogSource(source);

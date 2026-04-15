@@ -6,7 +6,7 @@
  *
  * Key design decisions:
  *   - PUSH deduplicates: a notification with the same dedupKey is suppressed
- *     if an identical one was pushed within the last 3 seconds.
+ *     if an identical one was pushed within the last 1 seconds.
  *   - DISMISS removes from the queue only; history is append-only.
  *   - History is capped at 200 entries (oldest trimmed) to bound memory use.
  */
@@ -32,7 +32,7 @@ export function notifReducer(state: NotifState, action: NotificationAction): Not
       const dedupKey = action.payload.dedupKey;
       const now = Date.now();
       const isDuplicate = state.queue.some(
-        n => !n.dismissed && n.dedupKey === dedupKey && now - n.timestamp < 3000
+        n => !n.dismissed && n.dedupKey === dedupKey && now - n.timestamp < 1000
       );
       if (isDuplicate) return state;
 

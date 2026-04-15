@@ -24,7 +24,6 @@ export const initialCartState: CartState = {
   items: [],
   version: 0,
   checksum: computeCartChecksum([]),
-  baselineSnapshot: {},
   idempotencyKey: generateIdempotencyKey(),
   status: 'idle',
 };
@@ -115,10 +114,6 @@ export function cartReducer(state: CartState, action: CartAction): CartState {
     case 'SYNC_FROM_STORAGE':
       logger.info('cart', 'SYNC_FROM_STORAGE', { version: action.payload.version });
       return { ...action.payload };
-
-    case 'SET_BASELINE_SNAPSHOT':
-      logger.debug('cart', 'SET_BASELINE_SNAPSHOT', { productCount: Object.keys(action.payload).length });
-      return { ...state, baselineSnapshot: action.payload };
 
     case 'RESET_IDEMPOTENCY_KEY':
       logger.info('cart', 'RESET_IDEMPOTENCY_KEY — new checkout session');

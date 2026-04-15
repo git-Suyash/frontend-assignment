@@ -26,22 +26,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(cartReducer, initialCartState);
 
   // ── Effect 1: Hydrate from localStorage on mount ──────────────────────────
-  // Runs once. Reads any previously persisted cart and the baseline price
-  // snapshot (used by the price-tampering check at checkout).
+  // Runs once. Reads any previously persisted cart state from localStorage.
+  // Price baseline validation is handled via IndexedDB (see catalogDb.ts) and
+  // is performed at checkout time, not at hydration time.
   useEffect(() => {
     const persisted = loadCart();
     if (persisted) {
       dispatch({ type: 'SYNC_FROM_STORAGE', payload: persisted });
-    }
-
-    const baselineRaw = localStorage.getItem('baseline_snapshot');
-    if (baselineRaw) {
-      try {
-        const baseline = JSON.parse(baselineRaw) as Record<number, number>;
-        dispatch({ type: 'SET_BASELINE_SNAPSHOT', payload: baseline });
-      } catch {
-        dispatch({ type: 'SET_BASELINE_SNAPSHOT', payload: {} });
-      }
     }
   }, []);
 

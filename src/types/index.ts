@@ -25,10 +25,9 @@ export type CartStatus =
 
 export interface CartState {
   items: CartItem[];
-  version: number;           // Increments on every mutation. Used for cross-tab conflict detection.
-  checksum: string;          // FNV-1a hash of serialized items (id+qty+price). Recomputed on every mutation.
-  baselineSnapshot: Record<number, number>; // productId → price at page load. Never updated after initial set.
-  idempotencyKey: string;    // UUID for the current checkout session. Generated fresh per checkout attempt.
+  version: number;        // Increments on every mutation. Used for cross-tab conflict detection.
+  checksum: string;       // FNV-1a hash of serialized items (id+qty+price). Recomputed on every mutation.
+  idempotencyKey: string; // UUID for the current checkout session. Generated fresh per checkout attempt.
   status: CartStatus;
 }
 
@@ -42,7 +41,6 @@ export type CartAction =
   | { type: 'SET_LOCK'; payload: { locked: boolean } }
   | { type: 'SET_STATUS'; payload: { status: CartStatus } }
   | { type: 'SYNC_FROM_STORAGE'; payload: CartState }
-  | { type: 'SET_BASELINE_SNAPSHOT'; payload: Record<number, number> }
   | { type: 'RESET_IDEMPOTENCY_KEY' };
 
 // ─── Order State Machine ──────────────────────────────────────────────────────
@@ -110,7 +108,10 @@ export type AuditEventType =
   | 'ORDER_INCONSISTENT'
   | 'IDEMPOTENCY_BLOCK'
   | 'ROLLBACK_INITIATED'
-  | 'RETRY_INITIATED';
+  | 'RETRY_INITIATED'
+  | 'BASELINE_INTEGRITY_FAILED'
+  | 'BASELINE_TAMPERING_DETECTED'
+  | 'BASELINE_MISSING';
 
 export interface AuditEvent {
   timestamp: number;

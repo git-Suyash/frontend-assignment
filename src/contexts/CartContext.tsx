@@ -1,76 +1,35 @@
-import {
-  createContext,
-  useContext,
-  useReducer,
-  useEffect,
-  type Dispatch,
-  type ReactNode,
-} from 'react';
-import type { CartState, CartAction } from '../types';
-import { cartReducer, initialCartState } from '../reducers/cartReducer';
-import { persistCart, loadCart, CART_STORAGE_KEY } from '../utils/storage';
+/**
+ * CartContext
+ *
+ * Creates and exports the React context object for the shopping cart.
+ * This file is intentionally kept to a single responsibility: context creation.
+ *
+ * Separation rationale:
+ *   - Keeping the context object in its own file lets both CartProvider and
+ *     useCart import it without circular dependencies.
+ *   - Vite Fast Refresh requires that every .tsx file export ONLY React
+ *     components. Isolating the context object here (no JSX, no component
+ *     export) satisfies that constraint.
+ *
+ * Consumers:
+ *   - CartProvider  (src/contexts/CartProvider.tsx) — wraps the app tree
+ *   - useCart       (src/hooks/useCart.ts)           — reads the context
+ */
 
-interface CartContextValue {
+import { createContext, type Dispatch } from 'react';
+import type { CartState, CartAction } from '../types';
+
+/** Shape of the value held in CartContext. */
+export interface CartContextValue {
+  /** Full cart state (items, version, checksum, status, …). */
   state: CartState;
+  /** Reducer dispatch — send CartAction messages to mutate state. */
   dispatch: Dispatch<CartAction>;
 }
 
+/**
+ * The cart context itself. Initialised to `null` so that `useCart` can
+ * throw a helpful error when consumed outside its provider, rather than
+ * silently operating on a default value.
+ */
 export const CartContext = createContext<CartContextValue | null>(null);
-
-export function CartProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(cartReducer, initialCartState);
-
-  // Hydrate from localStorage on mount
-  useEffect(() => {
-    const persisted = loadCart();
-    if (persisted) {
-      dispatch({ type: 'SYNC_FROM_STORAGE', payload: persisted });
-    }
-
-    const baselineRaw = localStorage.getItem('baseline_snapshot');
-    if (baselineRaw) {
-      try {
-        const baseline = JSON.parse(baselineRaw) as Record<number, number>;
-        dispatch({ type: 'SET_BASELINE_SNAPSHOT', payload: baseline });
-      } catch {
-        dispatch({ type: 'SET_BASELINE_SNAPSHOT', payload: {} });
-      }
-    }
-  }, []);
-
-  // Persist on every state change
-  useEffect(() => {
-    persistCart(state);
-  }, [state]);
-
-  // Cross-tab sync — silently apply updates from other tabs
-  useEffect(() => {
-    function handleStorage(event: StorageEvent) {
-      if (event.key === CART_STORAGE_KEY && event.newValue) {
-        try {
-          const parsed = JSON.parse(event.newValue) as CartState;
-          if (parsed.version !== state.version) {
-            dispatch({ type: 'SYNC_FROM_STORAGE', payload: parsed });
-          }
-        } catch {
-          // ignore malformed storage values
-        }
-      }
-    }
-
-    window.addEventListener('storage', handleStorage);
-    return () => window.removeEventListener('storage', handleStorage);
-  }, [state.version]);
-
-  return (
-    <CartContext.Provider value={{ state, dispatch }}>
-      {children}
-    </CartContext.Provider>
-  );
-}
-
-export function useCart(): CartContextValue {
-  const ctx = useContext(CartContext);
-  if (!ctx) throw new Error('useCart must be used within CartProvider');
-  return ctx;
-}

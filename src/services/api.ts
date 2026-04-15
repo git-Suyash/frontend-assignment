@@ -1,3 +1,21 @@
+/**
+ * api
+ *
+ * HTTP client layer for the FakeStore API. All requests are routed through
+ * the `apiFetch` helper, which adds a simulated network delay and structured
+ * request/response logging.
+ *
+ * INJECTED_DELAY_MS:
+ *   An artificial delay added before every request. This is intentional —
+ *   it makes loading states and skeleton UIs visible during development and
+ *   demos. Set to 0 to remove for performance testing.
+ *
+ * Error handling:
+ *   Non-2xx responses throw an Error with the format `"API_ERROR: <status> <url>"`.
+ *   Callers (useProducts, checkoutValidation) are responsible for catching
+ *   and surfacing these errors appropriately.
+ */
+
 import type { Product } from '../types';
 import { sleep } from '../utils/sleep';
 import { logger } from '../utils/logger';

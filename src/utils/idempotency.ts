@@ -1,3 +1,24 @@
+/**
+ * idempotency
+ *
+ * Provides a simple client-side idempotency key mechanism to prevent
+ * accidental duplicate order submissions.
+ *
+ * How it works:
+ *   1. A UUID key is generated when CartProvider initialises the cart state.
+ *   2. At checkout, `consumeIdempotencyKey` is called. If the key has already
+ *      been consumed (it's in localStorage), it returns `false` and the
+ *      checkout is blocked with an IDEMPOTENCY_REUSE error.
+ *   3. After a successful or failed submission, `RESET_IDEMPOTENCY_KEY` is
+ *      dispatched to generate a fresh key for the next attempt.
+ *
+ * Limitations:
+ *   - This is a client-side safety net only. The server must implement its
+ *     own idempotency via the X-Idempotency-Key header.
+ *   - The consumed-keys list is capped at 10 entries to avoid unbounded
+ *     localStorage growth.
+ */
+
 const STORAGE_KEY = 'consumed_idempotency_keys';
 
 export function generateIdempotencyKey(): string {

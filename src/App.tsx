@@ -1,8 +1,8 @@
 import { lazy, Suspense } from 'react';
 import { RouterProvider } from 'react-router-dom';
-import { NotificationProvider } from './contexts/NotificationContext';
-import { OrderProvider } from './contexts/OrderContext';
-import { CartProvider } from './contexts/CartContext';
+import { NotificationProvider } from './contexts/NotificationProvider';
+import { OrderProvider } from './contexts/OrderProvider';
+import { CartProvider } from './contexts/CartProvider';
 import { router } from './router';
 import NotificationQueue from './components/NotificationQueue';
 import { useOnlineStatus } from './hooks/useOnlineStatus';

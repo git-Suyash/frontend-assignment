@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useNotification } from '../contexts/NotificationContext';
+import { useNotification } from '../hooks/useNotification';
 import { getAuditLog } from '../utils/auditLog';
 import type { Notification, NotificationType } from '../types';
 

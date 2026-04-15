@@ -1,3 +1,17 @@
+/**
+ * useOnlineStatus
+ *
+ * Subscribes to the browser's online/offline events and exposes the current
+ * network status as a reactive boolean.
+ *
+ * Initialises from `navigator.onLine` so the value is correct on first render
+ * without waiting for an event.
+ *
+ * Used by:
+ *   - useProducts   — skips network fetch and surfaces an error when offline
+ *   - App (OfflineBanner) — shows the sticky offline banner
+ */
+
 import { useState, useEffect } from 'react';
 
 export function useOnlineStatus(): { isOnline: boolean } {

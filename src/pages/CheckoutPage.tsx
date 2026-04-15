@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useCart } from '../contexts/CartContext';
-import { useOrder } from '../contexts/OrderContext';
-import { useNotification } from '../contexts/NotificationContext';
+import { useCart } from '../hooks/useCart';
+import { useOrder } from '../hooks/useOrder';
+import { useNotification } from '../hooks/useNotification';
 import { validateCheckout, type ValidationFailureReason } from '../services/checkoutValidation';
 import { submitOrder, simulatePartialFailure } from '../services/orders';
 import { auditLog } from '../utils/auditLog';
@@ -77,7 +77,7 @@ export default function CheckoutPage() {
     if (orderState.current === 'ORDER_SUCCESS' && orderState.orderId) {
       navigate(`/order/${orderState.orderId}`);
     }
-  }, [orderState.current, orderState.orderId, navigate]);
+  }, [orderState.orderId, navigate, orderState]);
 
   // Refresh recovery: detect interrupted checkout
   useEffect(() => {

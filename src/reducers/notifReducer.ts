@@ -1,7 +1,23 @@
+/**
+ * notifReducer
+ *
+ * Pure reducer for the notification system. Manages an active queue (toasts
+ * visible on screen) and a permanent history (the notification center log).
+ *
+ * Key design decisions:
+ *   - PUSH deduplicates: a notification with the same dedupKey is suppressed
+ *     if an identical one was pushed within the last 3 seconds.
+ *   - DISMISS removes from the queue only; history is append-only.
+ *   - History is capped at 200 entries (oldest trimmed) to bound memory use.
+ */
+
 import type { Notification, NotificationAction } from '../types';
 
-interface NotifState {
+/** State shape shared between the reducer and NotificationContext. */
+export interface NotifState {
+  /** Active toasts awaiting dismissal. */
   queue: Notification[];
+  /** Permanent audit trail of all notifications, capped at 200 entries. */
   history: Notification[];
 }
 

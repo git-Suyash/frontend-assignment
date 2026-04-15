@@ -1,3 +1,25 @@
+/**
+ * checkoutValidation
+ *
+ * Runs a sequential pipeline of pre-submission checks on the cart state.
+ * The pipeline short-circuits on the first failure and returns a typed
+ * ValidationResult so callers can render a specific error message.
+ *
+ * Check order (fail-fast, cheapest checks first):
+ *   1. CART_EMPTY        — trivial guard, no I/O
+ *   2. CART_LOCKED       — prevent double-submission
+ *   3. CART_CONFLICT     — cross-tab edit detected
+ *   4. CHECKSUM_MISMATCH — FNV-1a hash mismatch (in-memory tampering)
+ *   5. PRICE_TAMPERING   — product.price vs snapshotPrice (in-memory)
+ *   6. STALE_PRICE       — re-fetch from API, compare snapshotPrice (network)
+ *   7. IDEMPOTENCY_REUSE — duplicate submission guard (localStorage)
+ *
+ * The stale-price check (step 6) is the only async step. If the API call
+ * fails, the check is skipped to avoid blocking a legitimate checkout due
+ * to a transient network error. All security-relevant checks (4, 5) are
+ * synchronous and cannot be bypassed this way.
+ */
+
 import type { CartState } from '../types';
 import { computeCartChecksum } from '../utils/fnv1a';
 import { detectPriceTampering, detectStalePrice } from '../utils/priceValidation';

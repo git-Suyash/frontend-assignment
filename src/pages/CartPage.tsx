@@ -1,8 +1,8 @@
 import { useState, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { List } from 'react-window';
-import { useCart } from '../contexts/CartContext';
-import { useNotification } from '../contexts/NotificationContext';
+import { useCart } from '../hooks/useCart';
+import { useNotification } from '../hooks/useNotification';
 import { CartRow, type CartRowExtraProps } from '../components/CartRow';
 import NotificationCenter from '../components/NotificationCenter';
 

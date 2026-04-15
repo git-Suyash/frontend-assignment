@@ -1,3 +1,21 @@
+/**
+ * orderReducer
+ *
+ * Pure reducer that drives the order state machine. All state transitions
+ * are validated by the machine's adjacency list before being applied —
+ * invalid transitions are logged and silently rejected so the UI never
+ * ends up in an impossible state.
+ *
+ * State machine states (see orderStateMachine.ts for the full graph):
+ *   CART_READY → CHECKOUT_VALIDATED → ORDER_SUBMITTED
+ *   ORDER_SUBMITTED → ORDER_SUCCESS | ORDER_FAILED | ORDER_INCONSISTENT
+ *   ORDER_FAILED | ORDER_INCONSISTENT → ORDER_SUBMITTED (retry) | ROLLED_BACK
+ *   ROLLED_BACK → CART_READY
+ *
+ * `retryCount` is intentionally preserved on RESET_ORDER so that the
+ * post-rollback session remembers how many attempts were made.
+ */
+
 import type { OrderState, OrderAction } from '../types';
 import { transition } from '../machines/orderStateMachine';
 import { logger } from '../utils/logger';

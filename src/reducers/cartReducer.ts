@@ -1,3 +1,20 @@
+/**
+ * cartReducer
+ *
+ * Pure reducer for the shopping cart. All mutations go through here so that
+ * the state transition history is predictable and testable.
+ *
+ * Checksum invariant:
+ *   Every action that touches `items` MUST recompute the FNV-1a checksum.
+ *   The checksum is later verified by validateCheckout to detect client-side
+ *   tampering between "add to cart" and "place order".
+ *
+ * Version counter:
+ *   `version` increments on every item mutation. CartProvider's cross-tab
+ *   sync effect uses it to detect whether a storage event carries a newer
+ *   or duplicate state.
+ */
+
 import type { CartState, CartAction } from '../types';
 import { computeCartChecksum } from '../utils/fnv1a';
 import { generateIdempotencyKey } from '../utils/idempotency';

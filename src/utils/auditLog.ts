@@ -1,3 +1,25 @@
+/**
+ * auditLog
+ *
+ * Append-only security audit trail stored in localStorage. Records
+ * significant checkout and cart-security events so that suspicious activity
+ * (price tampering, checksum mismatches, idempotency reuse) can be reviewed
+ * after the fact.
+ *
+ * Each entry carries:
+ *   - `event`      — the type of event (see AuditEventType in types/index.ts)
+ *   - `timestamp`  — Unix milliseconds
+ *   - `sessionId`  — anonymous UUID per browser session (never user-identifying)
+ *   - optional metadata (cartVersion, cartItemCount, reason)
+ *
+ * Design notes:
+ *   - The log is capped at 100 entries; oldest entries are trimmed first.
+ *   - `getAuditLog` and `exportAuditLogSafe` are exposed for the diagnostic
+ *     copy feature in NotificationCenter and the DevBridge window API.
+ *   - In development, each entry is also printed to the console via
+ *     console.group for real-time visibility.
+ */
+
 import type { AuditEvent, AuditEventType } from '../types';
 
 const AUDIT_LOG_KEY = 'audit_log';

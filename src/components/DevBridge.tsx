@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
-import { useCart } from '../contexts/CartContext';
-import { useOrder } from '../contexts/OrderContext';
-import { useNotification } from '../contexts/NotificationContext';
+import { useCart } from '../hooks/useCart';
+import { useOrder } from '../hooks/useOrder';
+import { useNotification } from '../hooks/useNotification';
 import { getAuditLog } from '../utils/auditLog';
 import type { CartState, OrderState, Notification, AuditEvent } from '../types';
 

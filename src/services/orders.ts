@@ -1,3 +1,22 @@
+/**
+ * orders
+ *
+ * Simulated order submission service. Posts a cart payload to
+ * jsonplaceholder.typicode.com/posts as a stand-in for a real order API.
+ *
+ * simulatePartialFailure:
+ *   Randomly returns `true` ~15% of the time. When `true`, `submitOrder`
+ *   throws PARTIAL_FAILURE *after* a successful HTTP 201 response, simulating
+ *   the real-world scenario where the order was accepted by the server but
+ *   client-side persistence (e.g. writing the orderId to state) failed.
+ *   CheckoutPage handles this with the ORDER_INCONSISTENT state and offers
+ *   the user a choice to retry or roll back.
+ *
+ * Idempotency:
+ *   The `X-Idempotency-Key` header is forwarded on every request so a real
+ *   backend could safely de-duplicate retries without double-charging.
+ */
+
 import type { CartItem } from '../types';
 import { sleep } from '../utils/sleep';
 import { logger } from '../utils/logger';

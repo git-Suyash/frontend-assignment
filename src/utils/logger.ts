@@ -1,3 +1,26 @@
+/**
+ * logger
+ *
+ * Lightweight structured console logger scoped to named app features.
+ * Output is suppressed entirely outside of development builds so that
+ * production bundles emit nothing to the console.
+ *
+ * Usage:
+ *   logger.info('cart', 'Item added', { productId: 42 });
+ *   logger.error('order', 'Submission failed', error);
+ *
+ * Feature namespaces:
+ *   'cart'          — cart mutations, storage sync, cross-tab events
+ *   'checkout'      — validation pipeline
+ *   'order'         — order state machine transitions
+ *   'notifications' — notification queue and dedup
+ *   'security'      — price tampering, checksum verification
+ *   'pwa'           — IndexedDB catalog cache, network revalidation
+ *
+ * Log levels map to console groups with colour-coded labels for easy
+ * filtering in DevTools.
+ */
+
 type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 type Feature = 'cart' | 'checkout' | 'order' | 'notifications' | 'security' | 'pwa';
 

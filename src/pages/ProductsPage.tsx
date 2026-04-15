@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useCart } from '../contexts/CartContext';
-import { useNotification } from '../contexts/NotificationContext';
+import { useCart } from '../hooks/useCart';
+import { useNotification } from '../hooks/useNotification';
 import { useProducts } from '../hooks/useProducts';
 import { useDebounce } from '../hooks/useDebounce';
 import { useProductFilter, type SortOption } from '../hooks/useProductFilter';
@@ -117,7 +117,7 @@ function ProductCard({ product, cartItem, onAddToCart, onIncrement, onDecrement 
 export default function ProductsPage() {
   const { state: cartState, dispatch: cartDispatch } = useCart();
   const { notify } = useNotification();
-  const { products, loading, error, categories } = useProducts();
+  const { products, loading, error, categories, catalogSource, revalidating } = useProducts();
   const [notifCenterOpen, setNotifCenterOpen] = useState(false);
 
   const [rawSearch, setRawSearch] = useState('');
@@ -187,6 +187,29 @@ export default function ProductsPage() {
       </header>
 
       <main className="max-w-7xl mx-auto px-5 py-7">
+        {/* Stale-cache / revalidating banner */}
+        {(catalogSource === 'stale-cache' || revalidating) && (
+          <div className="flex items-center gap-2 mb-4 px-3.5 py-2.5 rounded-xl bg-warn-muted border border-warn/20 text-warn text-xs font-medium">
+            {revalidating ? (
+              <>
+                <svg className="w-3.5 h-3.5 animate-spin flex-shrink-0" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8h4z" />
+                </svg>
+                Refreshing catalog in background…
+              </>
+            ) : (
+              <>
+                <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Showing cached catalog — prices may be outdated
+              </>
+            )}
+          </div>
+        )}
+
         {/* Search and filter toolbar */}
         <div className="bg-surface rounded-xl border border-border p-4 mb-6 flex flex-col sm:flex-row gap-3 shadow-sm">
           <input

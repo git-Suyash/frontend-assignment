@@ -1,3 +1,24 @@
+/**
+ * priceValidation
+ *
+ * Two complementary price integrity checks run at checkout time:
+ *
+ *   1. detectPriceTampering (in-memory, synchronous):
+ *      Compares each item's `product.price` against its `snapshotPrice`.
+ *      `snapshotPrice` is set once when the item is added and never mutated
+ *      by the reducer. A mismatch indicates that someone edited the cart
+ *      object in memory or localStorage after it was added.
+ *
+ *   2. detectStalePrice (network, asynchronous — called from checkoutValidation):
+ *      Compares `snapshotPrice` against freshly fetched API prices. A delta
+ *      greater than $0.01 means the product's price changed on the server
+ *      since the customer added the item. The customer must review before
+ *      we allow the order through.
+ *
+ * Neither function mutates state — they return results for the caller
+ * (validateCheckout) to decide how to respond.
+ */
+
 import type { CartItem } from '../types';
 
 export function detectPriceTampering(items: CartItem[]): boolean {

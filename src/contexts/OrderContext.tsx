@@ -1,48 +1,33 @@
-import {
-  createContext,
-  useContext,
-  useReducer,
-  useEffect,
-  type Dispatch,
-  type ReactNode,
-} from 'react';
-import type { OrderState, OrderAction } from '../types';
-import { orderReducer, initialOrderState } from '../reducers/orderReducer';
-import { persistOrder, loadOrder } from '../utils/storage';
-import { isTerminal } from '../machines/orderStateMachine';
+/**
+ * OrderContext
+ *
+ * Creates and exports the React context object for order state.
+ * This file is intentionally kept to a single responsibility: context creation.
+ *
+ * Separation rationale:
+ *   - Isolating the context object prevents Fast Refresh warnings that fire
+ *     when a .tsx file exports both React components and non-component values.
+ *   - Both OrderProvider and useOrder can import from here without creating
+ *     circular dependencies.
+ *
+ * Consumers:
+ *   - OrderProvider  (src/contexts/OrderProvider.tsx) — wraps the app tree
+ *   - useOrder       (src/hooks/useOrder.ts)           — reads the context
+ */
 
-interface OrderContextValue {
+import { createContext, type Dispatch } from 'react';
+import type { OrderState, OrderAction } from '../types';
+
+/** Shape of the value held in OrderContext. */
+export interface OrderContextValue {
+  /** Current order state machine state plus metadata (orderId, retryCount, …). */
   state: OrderState;
+  /** Reducer dispatch — send OrderAction messages to drive state transitions. */
   dispatch: Dispatch<OrderAction>;
 }
 
+/**
+ * The order context itself. Initialised to `null` so that `useOrder` can
+ * throw a descriptive error when consumed outside its provider.
+ */
 export const OrderContext = createContext<OrderContextValue | null>(null);
-
-export function OrderProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(orderReducer, initialOrderState);
-
-  // Restore persisted order on mount (handles refresh-during-checkout)
-  useEffect(() => {
-    const persisted = loadOrder();
-    if (persisted && !isTerminal(persisted.current)) {
-      dispatch({ type: 'TRANSITION', payload: { to: persisted.current } });
-    }
-  }, []);
-
-  // Persist on every state change
-  useEffect(() => {
-    persistOrder(state);
-  }, [state]);
-
-  return (
-    <OrderContext.Provider value={{ state, dispatch }}>
-      {children}
-    </OrderContext.Provider>
-  );
-}
-
-export function useOrder(): OrderContextValue {
-  const ctx = useContext(OrderContext);
-  if (!ctx) throw new Error('useOrder must be used within OrderProvider');
-  return ctx;
-}

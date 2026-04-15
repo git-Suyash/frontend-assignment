@@ -7,7 +7,7 @@
 | 1 | **Virtual list rendering** | `CartPage.tsx` → `react-window v2 <List>` | Chrome Elements panel: only ~8 DOM rows exist regardless of cart size |
 | 2 | **React Compiler auto-memoisation** | `babel-plugin-react-compiler` in `vite.config.ts` | React DevTools Profiler: components skip re-renders without manual `useMemo` |
 | 3 | **Debounced search input** | `useDebounce.ts` (300 ms) in `ProductsPage.tsx` | Network tab: filter re-computation fires at most once per 300 ms idle period |
-| 4 | **Code splitting / lazy routes** | `router/index.tsx` → `React.lazy()` on all pages | `bun run build` output: separate JS chunks per page |
+| 4 | **Code splitting / lazy routes** | `router/index.tsx` → `React.lazy()` on non-critical pages (ProductsPage, OrderPage); CartPage, CheckoutPage, OfflinePage are eagerly bundled for offline resilience | `bun run build` output: separate JS chunks for lazy pages only |
 | 5 | **PWA StaleWhileRevalidate caching** | `vite.config.ts` Workbox `runtimeCaching` | DevTools → Application → Cache Storage: fakestoreapi responses cached after first load |
 
 ---
@@ -62,23 +62,29 @@ const filteredProducts = useProductFilter(products, debouncedSearch, category, s
 
 ### 4. Code Splitting
 
-All route-level pages are lazy-loaded. Vite emits a separate chunk for each page:
+Non-critical pages are lazy-loaded. Critical-path pages (CartPage, CheckoutPage, OfflinePage) are **eagerly bundled** into the main chunk so they are available without a network request — this is essential for offline reliability. Lazy-loading these pages would cause a "Failed to fetch dynamically imported module" crash when the user comes back online after an offline session, because the chunks were never cached.
 
 ```
-dist/assets/ProductsPage-*.js   ~10 kB
-dist/assets/CartPage-*.js       ~17 kB
-dist/assets/CheckoutPage-*.js   ~15 kB
-dist/assets/OrderPage-*.js       ~9 kB
+dist/assets/ProductsPage-*.js   ~10 kB   ← lazy chunk
+dist/assets/OrderPage-*.js       ~9 kB   ← lazy chunk
+(CartPage, CheckoutPage, OfflinePage are inlined into the main bundle)
 ```
-
-The main bundle only loads the routing shell; page bundles are fetched on demand.
 
 ```tsx
 // router/index.tsx
+// Eager imports — always in the main bundle, available offline
+import CartPage from '../pages/CartPage';
+import CheckoutPage from '../pages/CheckoutPage';
+import OfflinePage from '../pages/OfflinePage';
+
+// Lazy imports — fetched on demand; non-critical path
 const ProductsPage = lazy(() => import('../pages/ProductsPage'));
+const OrderPage    = lazy(() => import('../pages/OrderPage'));
 ```
 
-*To verify:* Open DevTools → Network, filter by JS, navigate between pages, observe separate chunk fetches.
+Every route also has an `errorElement: <RouteErrorBoundary />`. If a lazy chunk fails to load (e.g. network interrupted mid-session), the user sees a friendly "Reload page" prompt rather than the generic React Router crash screen.
+
+*To verify:* Open DevTools → Network, filter by JS, navigate to ProductsPage and OrderPage — you will see separate chunk fetches. Navigating to CartPage or CheckoutPage will not trigger additional chunk requests.
 
 ---
 

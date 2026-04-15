@@ -10,7 +10,7 @@
 | **Compiler** | React Compiler (babel-plugin-react-compiler) | Automatic memoisation — no manual `useMemo`/`useCallback` needed |
 | **Language** | TypeScript strict mode | Eliminates whole categories of runtime bugs at authoring time |
 | **Styling** | Tailwind CSS v4 | Utility-first, no runtime, Vite plugin for zero-config setup |
-| **Routing** | React Router v7 | File-free route definition, `createBrowserRouter`, lazy page loading |
+| **Routing** | React Router v7 | File-free route definition, `createBrowserRouter`, selective lazy page loading, per-route `errorElement` |
 | **Virtual list** | react-window v2 | Renders only visible rows — essential for 600-product cart list |
 | **State** | React Context + useReducer | Sufficient for this scale; avoids adding Zustand/Redux overhead |
 | **PWA** | vite-plugin-pwa + Workbox | Service worker generation, offline cache, installability |
@@ -75,12 +75,26 @@ All transitions are validated by `transition(from, to)` in `orderStateMachine.ts
 ```
 src/
 ├── components/        UI building blocks (CartRow, OrderTimeline, NotificationToast, …)
-├── contexts/          React Context providers (Cart, Order, Notification)
-├── hooks/             Custom hooks (useProducts, useDebounce, useOnlineStatus, …)
+├── contexts/          Context objects only — one file per context (no components, no hooks)
+│   ├── CartContext.tsx          createContext call + CartContextValue interface
+│   ├── CartProvider.tsx         CartProvider component (localStorage sync, cross-tab listener)
+│   ├── OrderContext.tsx         createContext call + OrderContextValue interface
+│   ├── OrderProvider.tsx        OrderProvider component (order persistence effects)
+│   ├── NotificationContext.tsx  createContext call + NotificationContextValue interface
+│   └── NotificationProvider.tsx NotificationProvider component (notify helper, ARIA regions)
+├── hooks/             Custom hooks — each file exports exactly one hook
+│   ├── useCart.ts               Consumer hook for CartContext (throws outside CartProvider)
+│   ├── useOrder.ts              Consumer hook for OrderContext
+│   ├── useNotification.ts       Consumer hook for NotificationContext
+│   ├── useProducts.ts           Stale-while-revalidate product loader
+│   ├── useProductFilter.ts      Search + sort + category filter pipeline
+│   ├── useOnlineStatus.ts       navigator.onLine + online/offline events
+│   └── useDebounce.ts           Generic debounce — used for search input
 ├── machines/          Order state machine — transitions, labels, terminal check
-├── pages/             Route-level components (lazy-loaded by router)
+├── pages/             Route-level components (ProductsPage + OrderPage are lazy-loaded;
+│                      CartPage, CheckoutPage, OfflinePage are eagerly bundled)
 ├── reducers/          Pure reducer functions for each context
-├── router/            createBrowserRouter config + page skeleton
+├── router/            createBrowserRouter config, RouteErrorBoundary, lazy page imports
 ├── services/          API calls (api.ts) and order submission (orders.ts)
 ├── types/             Single index.ts — all shared TypeScript types
 └── utils/             Pure utilities: fnv1a, idempotency, storage, auditLog, logger, …
@@ -88,3 +102,15 @@ src/
 docs/                  Written deliverables (this file + 5 others)
 public/icons/          PWA icon assets
 ```
+
+### Context Module Convention
+
+Each context is split across three files to satisfy Vite Fast Refresh constraints (a `.tsx` file may only export React components for HMR to work correctly):
+
+| File | Exports | Vite HMR |
+|---|---|---|
+| `contexts/XxxContext.tsx` | `XxxContext` object + `XxxContextValue` interface | No components — no constraint |
+| `contexts/XxxProvider.tsx` | `XxxProvider` component **only** | One component — Fast Refresh works |
+| `hooks/useXxx.ts` | `useXxx` hook **only** | Plain `.ts` — no HMR constraint |
+
+All consumer files (pages, components, other hooks) import exclusively from the `hooks/` layer.

@@ -149,7 +149,7 @@ export default function CheckoutPage() {
     }
   }, [cartState, cartDispatch, orderDispatch, notify, navigate]);
 
-  async function handlePlaceOrder(e: React.FormEvent) {
+  async function handlePlaceOrder(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
 
     if (!validateForm()) return;

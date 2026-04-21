@@ -94,7 +94,9 @@ src/
 ├── pages/             Route-level components (ProductsPage + OrderPage are lazy-loaded;
 │                      CartPage, CheckoutPage, OfflinePage are eagerly bundled)
 ├── reducers/          Pure reducer functions for each context
-├── router/            createBrowserRouter config, RouteErrorBoundary, lazy page imports
+├── router/            createBrowserRouter config and route-level UI components
+│   ├── index.tsx                createBrowserRouter definition — exports only `router` (non-component)
+│   └── components.tsx           RouteErrorBoundary, PageSkeleton, NotFoundPage components
 ├── services/          API calls (api.ts) and order submission (orders.ts)
 ├── types/             Single index.ts — all shared TypeScript types
 └── utils/             Pure utilities: fnv1a, idempotency, storage, auditLog, logger, …
@@ -114,3 +116,12 @@ Each context is split across three files to satisfy Vite Fast Refresh constraint
 | `hooks/useXxx.ts` | `useXxx` hook **only** | Plain `.ts` — no HMR constraint |
 
 All consumer files (pages, components, other hooks) import exclusively from the `hooks/` layer.
+
+### Router Module Convention
+
+The same Fast Refresh rule applies to the router: a file that exports a non-component value (the `router` object) cannot also export components without suppressing HMR. The `router/` folder is therefore split across two files:
+
+| File | Exports | Why |
+|---|---|---|
+| `router/index.tsx` | `router` (the `createBrowserRouter` instance) | Non-component export — no components allowed alongside it |
+| `router/components.tsx` | `RouteErrorBoundary`, `PageSkeleton`, `NotFoundPage` | Component-only file — Fast Refresh works |
